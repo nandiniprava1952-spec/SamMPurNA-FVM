@@ -17,7 +17,7 @@ body{margin:0;font-family:'IBM Plex Sans','Segoe UI',Arial,sans-serif;background
 .mut{color:var(--muted)}
 header{display:flex;align-items:center;gap:10px;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top,0px));background:var(--panel);border-bottom:1px solid var(--border);flex-wrap:wrap;position:sticky;top:0;z-index:5}
 header{background:var(--bg);color:var(--text);border-bottom:3px solid var(--accent)}header .pill,#who,#vw{color:var(--muted)}
-.sw{display:inline-flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;color:var(--text)}.sw input{display:none}.sw .tr{width:34px;height:18px;border-radius:99px;background:var(--border);position:relative;transition:.15s}.sw .tr::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:.15s}.sw input:checked+.tr{background:var(--ok)}.sw input:checked+.tr::after{left:18px}.sw input:disabled+.tr{opacity:.5}
+.net{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--text)}.net i{width:8px;height:8px;border-radius:50%;background:var(--ok)}.net.off i{background:#f59e0b}.net.off b{color:#f59e0b}
 header h1{font-size:15px;margin:0 auto 0 0;font-weight:600}header h1 span{color:var(--accent)}
 .pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);border:1px solid var(--border);border-radius:99px;padding:3px 9px}.pill i{width:7px;height:7px;border-radius:50%;background:var(--ok)}.pill.off i{background:#f59e0b}
 #who,#vw{font-size:12px;color:var(--muted)}#who b,#vw b{color:var(--accent)}
@@ -77,7 +77,7 @@ label.up{display:inline-flex;align-items:center;cursor:pointer;border:1px solid 
 <!-- APP -->
 <div id="app" hidden>
 <header><h1>SamMPurna <span>Field Visit Monitoring</span> — Odisha NHM</h1>
-  <label class="sw" id="swW" title="Switch between online (sync with cloud) and offline (use saved data)"><input type="checkbox" id="netSw" checked><span class="tr"></span><b id="netT">Online</b></label><span class="pill" id="pill"><i></i><span id="src">—</span></span><span id="who"></span>
+  <span class="net" id="netW"><i></i><b id="netT">Online</b></span><span class="pill" id="pill"><i></i><span id="src">—</span></span><span id="who"></span>
   <button class="hb" id="inst" hidden>⬇ Install</button><button class="hb" id="syn">⟳ Sync</button><button class="hb" id="chpw">Password</button><button class="hb" id="out">Sign out</button>
   <div class="switcher" id="tabs"><button class="active" data-v="v1">Overview</button><button data-v="v2" id="tMx">District / Block Matrix</button><button data-v="v3">Monitors</button><button data-v="v4" id="tAdmin" hidden>Admin</button><button data-v="v5" id="tSum">Summary</button></div></header>
 <div class="f" id="fbar"><span id="vw" style="align-self:center;width:100%"></span>
@@ -97,8 +97,8 @@ label.up{display:inline-flex;align-items:center;cursor:pointer;border:1px solid 
 
 <div class="v" id="v5"><div><h2 style="font-size:16px;color:var(--text);text-transform:none;margin:0 0 4px">Summary</h2><p class="mut" id="smP" style="margin:0 0 10px"></p></div><div class="k" id="smK"></div>
 <div class="g"><div class="c"><h2>Highlights</h2><ul id="smH" style="margin:0;padding-left:18px;line-height:1.8"></ul></div>
-<div class="c"><h2>Top 5 districts by visits</h2><div class="w"><table id="smT"></table></div></div>
-<div class="c"><h2>Needs attention: longest since last visit</h2><div class="w"><table id="smL"></table></div></div></div></div>
+<div class="c"><h2 id="smTH">Top 5 districts by visits</h2><div class="w"><table id="smT"></table></div></div>
+<div class="c"><h2 id="smLH">Needs attention: longest since last visit</h2><div class="w"><table id="smL"></table></div></div></div></div>
 <div class="v" id="v4">
   <div class="c"><h2>Cloud data</h2><div id="cloudInfo" class="mut"></div>
     <div class="row"><label class="up">⬆ Choose CSV / XLSX<input type="file" id="up" accept=".csv,.xlsx,.xls" hidden></label><span id="upInfo" class="mut"></span></div>
@@ -147,7 +147,6 @@ let tt;function toast(m,btn){$('toastT').textContent=m;$('toastB').hidden=!btn;$
 /* ═════ API ═════ */
 async function api(action,extra){
   if(!API_URL||/^PASTE/.test(API_URL))throw new Error('API_URL is not set in index.html');
-  if(manualOff&&action!=='login')throw new TypeError('Offline mode is on');
   const r=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({action,token:S&&S.token},extra||{}))});
   const j=await r.json();
   if(!j.ok&&j.code==='AUTH'&&S){await logout();$('lgErr').textContent=j.error||'Please sign in again.';throw new Error(j.error)}
@@ -180,16 +179,15 @@ async function enter(){$('lg').hidden=true;$('app').hidden=false;applyRole();
 function setSrc(t,off){$('src').textContent=t;$('pill').classList.toggle('off',!!off)}
 
 /* ═════ sync ═════ */
-let syncing=false,manualOff=false;try{manualOff=localStorage.getItem('smp_off')==='1'}catch(e){}
+let syncing=false,srvDown=false;
 const offTxt=()=>R.length?'Offline · showing saved data':'Offline · no saved data yet';
-function updateNet(){const on=navigator.onLine&&!manualOff;$('netSw').checked=on;$('netSw').disabled=!navigator.onLine;$('netT').textContent=on?'Online':'Offline'}
-$('netSw').onchange=()=>{manualOff=!$('netSw').checked;try{localStorage.setItem('smp_off',manualOff?'1':'0')}catch(e){}updateNet();if(manualOff)setSrc(offTxt(),true);else if(S)sync(false)};
-async function sync(force){if(syncing||!S)return;if(manualOff){setSrc(offTxt(),true);return}syncing=true;setSrc('Syncing…');
+function updateNet(){const on=navigator.onLine&&!srvDown;$('netW').classList.toggle('off',!on);$('netT').textContent=on?'Online':'Offline'}
+async function sync(force){if(syncing||!S)return;syncing=true;setSrc('Syncing…');
   try{const j=await api('data',{ver:force?'':ver});
     if(!j.unchanged){L=j.L;R=j.R;ver=j.ver;meta={at:j.at,total:j.total};await idb.set('data:'+S.user.username,{L,R,ver,meta,syncAt:Date.now()});setup();render()}
     else{meta={at:j.at,total:j.total};try{const c=await idb.get('data:'+S.user.username);if(c){c.syncAt=Date.now();await idb.set('data:'+S.user.username,c)}}catch(e){}}
-    setSrc('Cloud · synced '+new Date().toLocaleTimeString()+' · '+R.length.toLocaleString()+' visits');cloudInfo()}
-  catch(e){if(netErr(e))setSrc(R.length?'Offline · showing saved data':'Offline · no saved data yet',true);else if(S){setSrc('Sync failed',true);toast(e.message)}}
+    srvDown=false;updateNet();setSrc('Cloud · synced '+new Date().toLocaleTimeString()+' · '+R.length.toLocaleString()+' visits');cloudInfo()}
+  catch(e){if(netErr(e)){srvDown=true;updateNet()}if(netErr(e))setSrc(R.length?'Offline · showing saved data':'Offline · no saved data yet',true);else if(S){setSrc('Sync failed',true);toast(e.message)}}
   syncing=false}
 $('syn').onclick=()=>sync(true);
 addEventListener('online',()=>{updateNet();sync(false)});addEventListener('offline',()=>{updateNet();setSrc(R.length?'Offline · showing saved data':'Offline',true)});updateNet();
@@ -246,19 +244,19 @@ function renderSummary(rows){const n=rows.length,E=s=>String(s).replace(/[&<>"]/
  if(!n){$('smP').textContent='';$('smK').innerHTML='';$('smH').innerHTML='<li>No visits match the current filters.</li>';$('smT').innerHTML='';$('smL').innerHTML='';return}
  const dts=rows.map(r=>L.date[r[0]]).sort(),first=dts[0],last=dts[n-1],day=864e5,ago=k=>new Date(new Date(last+'T00:00:00Z')-k*day).toISOString().slice(0,10);
  const c7=dts.filter(d=>d>ago(7)).length,p7=dts.filter(d=>d>ago(14)&&d<=ago(7)).length,pc=(a,b)=>b?Math.round(100*a/b):0;
- const mons=new Set(),dists=new Set(),blks=new Set(),dc={},dl={};let team=0,geo=0;
- rows.forEach(r=>{mons.add(r[6]);dists.add(r[1]);blks.add(r[9]);const d=L.date[r[0]];dc[d]=(dc[d]||0)+1;if(!dl[r[1]]||d>dl[r[1]])dl[r[1]]=d;if(L.team[r[5]]!=='individual')team++;if(r[7])geo++});
- const busy=Object.entries(dc).sort((a,b)=>b[1]-a[1])[0],days=Object.keys(dc).length,tv=topN(cnt(rows,2,L.vtype.length),L.vtype,1)[0],tl=topN(cnt(rows,3,L.level.length),L.level,1)[0],td=topN(cnt(rows,1,L.dist.length),L.dist,5);
- $('smP').textContent='Based on the current filters · data from '+first+' to '+last;
+ const mons=new Set(),dists=new Set(),blks=new Set(),dc={},dl={};let team=0,geo=0;rows.forEach(r=>dists.add(r[1]));const one=dists.size===1,K=one?9:1,NM=one?L.blk:L.dist,U=one?'block':'district',UC=one?'Block':'District';
+ rows.forEach(r=>{mons.add(r[6]);dists.add(r[1]);blks.add(r[9]);const d=L.date[r[0]];dc[d]=(dc[d]||0)+1;if(!dl[r[K]]||d>dl[r[K]])dl[r[K]]=d;if(L.team[r[5]]!=='individual')team++;if(r[7])geo++});
+ const busy=Object.entries(dc).sort((a,b)=>b[1]-a[1])[0],days=Object.keys(dc).length,tv=topN(cnt(rows,2,L.vtype.length),L.vtype,1)[0],tl=topN(cnt(rows,3,L.level.length),L.level,1)[0],td=topN(cnt(rows,K,NM.length),NM,5);
+ $('smTH').textContent='Top 5 '+U+'s by visits';$('smLH').textContent='Needs attention: '+U+'s with the longest gap since last visit';$('smP').textContent='Based on the current filters · data from '+first+' to '+last;
  $('smK').innerHTML=[[n.toLocaleString(),'Total visits'],[mons.size.toLocaleString(),'Monitors'],[dists.size,'Districts'],[blks.size,'Blocks covered'],[days,'Active days'],[c7.toLocaleString(),'Last 7 days']].map(k=>`<div class="c"><b>${k[0]}</b><span>${k[1]}</span></div>`).join('');
  const ch=p7?(c7>=p7?'up ':'down ')+Math.abs(Math.round(100*(c7-p7)/p7))+'% from the 7 days before ('+p7.toLocaleString()+')':'no visits in the 7 days before';
  $('smH').innerHTML=[`<b>${n.toLocaleString()}</b> visits by <b>${mons.size.toLocaleString()}</b> monitors across <b>${dists.size}</b> districts and <b>${blks.size}</b> blocks.`,
   `Last 7 days: <b>${c7.toLocaleString()}</b> visits, ${ch}.`,`Busiest day: <b>${busy[0]}</b> with ${busy[1].toLocaleString()} visits; average <b>${Math.round(n/days)}</b> per active day.`,
   `Most common visit type: <b>${E(tv[0])}</b> (${pc(tv[1],n)}%). Most common level: <b>${E(tl[0])}</b> (${pc(tl[1],n)}%).`,
-  `Team visits: <b>${pc(team,n)}%</b>. Geo-tagged: <b>${pc(geo,n)}%</b>.`,`Top district: <b>${E(td[0][0])}</b> with ${td[0][1].toLocaleString()} visits (${pc(td[0][1],n)}% of the total).`].map(x=>'<li>'+x+'</li>').join('');
- $('smT').innerHTML='<tr><th>District</th><th class="n">Visits</th><th class="n">Share</th></tr>'+td.map(x=>`<tr><td>${E(x[0])}</td><td class="n">${x[1].toLocaleString()}</td><td class="n">${pc(x[1],n)}%</td></tr>`).join('');
+  `Team visits: <b>${pc(team,n)}%</b>. Geo-tagged: <b>${pc(geo,n)}%</b>.`,`Top ${U}: <b>${E(td[0][0])}</b> with ${td[0][1].toLocaleString()} visits (${pc(td[0][1],n)}% of the total).`].map(x=>'<li>'+x+'</li>').join('');
+ $('smT').innerHTML='<tr><th>'+UC+'</th><th class="n">Visits</th><th class="n">Share</th></tr>'+td.map(x=>`<tr><td>${E(x[0])}</td><td class="n">${x[1].toLocaleString()}</td><td class="n">${pc(x[1],n)}%</td></tr>`).join('');
  const old=Object.entries(dl).sort((a,b)=>a[1].localeCompare(b[1])).slice(0,5);
- $('smL').innerHTML='<tr><th>District</th><th class="n">Last visit</th><th class="n">Days before latest</th></tr>'+old.map(x=>`<tr><td>${E(L.dist[x[0]])}</td><td class="n">${x[1]}</td><td class="n">${Math.round((new Date(last)-new Date(x[1]))/day)}</td></tr>`).join('')}
+ $('smL').innerHTML='<tr><th>'+UC+'</th><th class="n">Last visit</th><th class="n">Days before latest</th></tr>'+old.map(x=>`<tr><td>${E(NM[x[0]])}</td><td class="n">${x[1]}</td><td class="n">${Math.round((new Date(last)-new Date(x[1]))/day)}</td></tr>`).join('')}
 document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.v').forEach(v=>v.classList.toggle('on',v.id===b.dataset.v));
   $('fbar').hidden=b.dataset.v==='v4';if(b.dataset.v==='v4')openAdmin();else render()});
 ['from','to','dist','vt','lv','ds'].forEach(i=>$(i).onchange=render);

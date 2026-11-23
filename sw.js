@@ -1,5 +1,5 @@
 /* SamMPurna FVM service worker — app shell offline. Bump VERSION on every release. */
-const VERSION = 'smp-fvm-v10';
+const VERSION = 'smp-fvm-v12';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png'];
 const LIBS = [
   'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js',
