@@ -53,3 +53,6 @@ The Records tab shows a place name (locality, district) above the coordinates fo
 
 ## Uploading new data
 Use **⚙ Filters → ⬆ Upload CSV / XLSX** (State only). Pick the file, then **Add new rows (skip duplicates)**. A row counts as a duplicate when all 10 fields match a row already in the cloud (date, district, block, visit type, level, designation, team, monitor, lat, lon). Each existing row cancels one identical uploaded row, so re-uploading the same file adds 0, an overlapping file adds only the new rows, and genuinely repeated identical visits inside one file are kept. **Replace all cloud data** is only for a full reset. After updating `Code.gs`: Deploy → Manage deployments → Edit → New version.
+
+## Full visit details (Records → View)
+Every column of the uploaded CSV/XLSX is now stored per visit (Visits sheet, column K "Extra") and shown in **Records → View**. After updating `Code.gs` deploy a **new version**. Rows uploaded earlier have no details: upload the CSV again with **Add new rows** and the existing rows are filled in (no duplicates are created).

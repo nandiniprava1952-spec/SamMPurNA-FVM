@@ -39,7 +39,7 @@ select,input,.f button,.btn{background:var(--bg);color:var(--text);border:1px so
 .g{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:12px}
 h2{font-size:12px;margin:0 0 8px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
 .ch{position:relative;height:240px}.w{overflow:auto;max-height:70vh}
-table{border-collapse:collapse;width:100%}#mt{width:auto;min-width:0}#mt th,#mt td{padding-right:22px}th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);white-space:nowrap}
+table{border-collapse:collapse;width:100%}#mt{width:100%}th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);white-space:nowrap}
 th{position:sticky;top:0;background:var(--panel);color:var(--muted);font-weight:600;z-index:1}.n{text-align:right}
 .d{cursor:pointer;background:rgba(167,139,250,.10)}.d:hover{background:rgba(167,139,250,.22)}.d td:first-child{font-weight:700}
 .car{display:inline-block;width:14px;color:var(--accent);transition:transform .15s}.d.open .car{transform:rotate(90deg)}
@@ -66,10 +66,11 @@ label.up{display:inline-flex;align-items:center;cursor:pointer;border:1px solid 
 #pw{position:fixed;inset:0;background:rgba(15,4,40,.75);display:flex;align-items:center;justify-content:center;z-index:20;padding:20px}
 #rcT tr:not(.hd){cursor:pointer}#rcT tr:not(.hd):hover td{background:rgba(251,146,60,.08)}
 #rd{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;padding:0}#rd[hidden]{display:none}
-#rd .rdc{background:var(--panel);border:1px solid var(--accent);border-radius:16px 16px 0 0;width:100%;max-width:520px;max-height:88vh;overflow:auto;padding:16px 18px calc(18px + env(safe-area-inset-bottom,0px))}
+#rd .rdc{background:var(--panel);border:1px solid var(--accent);border-radius:16px 16px 0 0;width:100%;max-width:680px;max-height:88vh;overflow:auto;padding:16px 18px calc(18px + env(safe-area-inset-bottom,0px))}
 @media(min-width:700px){#rd{align-items:center}#rd .rdc{border-radius:16px}}
 #rd h2{margin:0 0 10px;font-size:16px;display:flex;justify-content:space-between;align-items:center;gap:10px}
 #rd dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0 0 12px}#rd dt{color:var(--muted)}#rd dd{margin:0;font-weight:600;word-break:break-word}
+#rd .rf{display:grid;grid-template-columns:minmax(120px,38%) 1fr;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-top:6px}#rd .rf>div{padding:5px 9px;border-bottom:1px solid var(--border);font-size:12.5px;word-break:break-word}#rd .rf>div:nth-child(odd){color:var(--muted);background:rgba(0,0,0,.14)}#rd #rdQ{width:100%;margin-top:6px}
 #rd h3{font-size:13px;margin:12px 0 6px;color:var(--accent)}#rd .rl div{padding:4px 0;border-bottom:1px solid var(--border);font-size:13px}
 #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--panel);box-shadow:0 4px 16px rgba(0,0,0,.45);border:1px solid var(--accent2);padding:10px 14px;border-radius:10px;z-index:30;max-width:90vw;display:flex;gap:10px;align-items:center}
 @media(max-width:640px){
@@ -255,7 +256,7 @@ function applyRole(){const u=S.user,st=isState();
   document.querySelectorAll('#tabs button').forEach((b,i)=>b.classList.toggle('active',i===0));
   document.querySelectorAll('.v').forEach(v=>v.classList.toggle('on',v.id==='v1'));$('fbar').hidden=false}
 async function enter(){$('lg').hidden=true;$('app').hidden=false;applyRole();
-  try{const k='data:'+S.user.username,c=await idb.get(k);if(c&&c.R){L=c.L;R=c.R;ver=c.ver;meta=c.meta||{};setup();render();setSrc('Cached · '+new Date(c.syncAt).toLocaleString(),true)}else{setup();render()}}catch(e){setup();render()}
+  try{const k='data:'+S.user.username,c=await idb.get(k);if(c&&c.R&&(!c.R.length||c.R[0].length>=11)){L=c.L;R=c.R;ver=c.ver;meta=c.meta||{};setup();render();setSrc('Cached · '+new Date(c.syncAt).toLocaleString(),true)}else{setup();render()}}catch(e){setup();render()}
   await sync(false);if(S&&S.user.mustChange)openPw(true)}
 function setSrc(t,off){$('src').textContent=t;$('pill').classList.toggle('off',!!off)}
 
@@ -265,7 +266,7 @@ const offTxt=()=>R.length?'Offline · showing saved data':'Offline · no saved d
 function updateNet(){const on=navigator.onLine&&!srvDown,t=on?'Online':'Offline';['netW','netL'].forEach(i=>$(i).classList.toggle('off',!on));$('netT').textContent=$('netLT').textContent=t;$('offHint').hidden=on}
 async function sync(force){if(syncing||!S)return;syncing=true;setSrc('Syncing…');
   try{const j=await api('data',{ver:force?'':ver});
-    if(!j.unchanged){L=j.L;R=j.R;ver=j.ver;meta={at:j.at,total:j.total};await idb.set('data:'+S.user.username,{L,R,ver,meta,syncAt:Date.now()});setup();render()}
+    if(!j.unchanged){for(const k in DET)delete DET[k];L=j.L;R=j.R;ver=j.ver;meta={at:j.at,total:j.total};await idb.set('data:'+S.user.username,{L,R,ver,meta,syncAt:Date.now()});setup();render()}
     else{meta={at:j.at,total:j.total};try{const c=await idb.get('data:'+S.user.username);if(c){c.syncAt=Date.now();await idb.set('data:'+S.user.username,c)}}catch(e){}}
     srvDown=false;updateNet();setSrc('Cloud · synced '+new Date().toLocaleTimeString()+' · '+R.length.toLocaleString()+' visits');cloudInfo()}
   catch(e){if(netErr(e)){srvDown=true;updateNet()}if(netErr(e))setSrc(R.length?'Offline · showing saved data':'Offline · no saved data yet',true);else if(S){setSrc('Sync failed',true);toast(e.message)}}
@@ -319,9 +320,9 @@ function render(){if(!S)return;
    Object.keys(d.b).sort((x,y)=>d.b[y].v-d.b[x].v).forEach(k=>{const B=d.b[k];h2+=`<tr class="b${st?(open_.has(di_)?' show':''):' flat'}" data-p="${di_}"><td>${esc(L.blk[k])}</td>${z(B.v)}${z(B.m.size)}${z(B.bl)}${z(B.dl)}${z(B.tm)}${z(Math.round(100*B.g/B.v))}</tr>`;mxA.push([dn,L.blk[k],B.v,B.m.size,B.bl,B.dl,B.tm,Math.round(100*B.g/B.v)])})});
   h2+=`<tr class="t"><td>Total</td><td class="n">${tot[0]}</td><td class="n">${mons.size}</td><td class="n">${tot[1]}</td><td class="n">${tot[2]}</td><td class="n">${tot[3]}</td><td class="n">${tot[0]?Math.round(100*tot[4]/tot[0]):0}</td></tr>`;$('mx').innerHTML=h2;
   $('mx').querySelectorAll('.d').forEach(e=>e.onclick=()=>{const k=e.dataset.d;open_.has(k)?open_.delete(k):open_.add(k);e.classList.toggle('open');$('mx').querySelectorAll(`[data-p="${k}"]`).forEach(b=>b.classList.toggle('show'))});
-  renderSummary(rows);renderRecords(rows);const mAll=topN(cnt(rows,6,L.name.length),L.name,1e6);const mLast={};rows.forEach(r=>{const d=L.date[r[0]]||'';if(d>(mLast[r[6]]||''))mLast[r[6]]=d});const ago=d=>{if(!d)return'—';const k=Math.floor((Date.now()-new Date(d+'T00:00:00').getTime())/864e5);return k<=0?'today':k===1?'1 day ago':k+' days ago'};
-  const mName=m=>L.name.indexOf(m[0]);mtA=[['Rank','Monitor','Visits','Last active','Last active (ago)']].concat(mAll.map((m,i)=>{const d=mLast[mName(m)]||'';return[i+1,m[0],m[1],d,ago(d)]}));
-  $('mt').innerHTML='<tr><th>#</th><th>Monitor</th><th>Visits</th><th>Last active</th><th></th></tr>'+mAll.slice(0,200).map((m,i)=>{const d=mLast[mName(m)]||'';return`<tr><td>${i+1}</td><td>${esc(m[0])}</td><td>${m[1].toLocaleString()}</td><td>${esc(d||'—')}</td><td class="mut">${ago(d)}</td></tr>`}).join('')}
+  renderSummary(rows);renderRecords(rows);const mAll=topN(cnt(rows,6,L.name.length),L.name,1e6);const mLast={},mPl={};rows.forEach(r=>{const d=L.date[r[0]]||'';if(d>(mLast[r[6]]||'')){mLast[r[6]]=d;mPl[r[6]]=[L.dist[r[1]],L.blk[r[9]]]}});const ago=d=>{if(!d)return'—';const k=Math.floor((Date.now()-new Date(d+'T00:00:00').getTime())/864e5);return k<=0?'today':k===1?'1 day ago':k+' days ago'};
+  const mName=m=>L.name.indexOf(m[0]);mtA=[['Rank','Monitor','District','Block','Visits','Last active','Last active (ago)']].concat(mAll.map((m,i)=>{const k=mName(m),d=mLast[k]||'',pl=mPl[k]||['',''];return[i+1,m[0],pl[0],pl[1],m[1],d,ago(d)]}));
+  $('mt').innerHTML='<tr><th>#</th><th>Monitor</th><th>District</th><th>Block</th><th>Visits</th><th>Last active</th><th></th></tr>'+mAll.slice(0,200).map((m,i)=>{const k=mName(m),d=mLast[k]||'',pl=mPl[k]||['',''];return`<tr><td>${i+1}</td><td>${esc(m[0])}</td><td>${esc(pl[0])}</td><td>${esc(pl[1])}</td><td>${m[1].toLocaleString()}</td><td>${esc(d||'—')}</td><td class="mut">${ago(d)}</td></tr>`}).join('')}
 
 function renderSummary(rows){const n=rows.length,E=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
  if(!n){$('smP').textContent='';$('smK').innerHTML='';$('smH').innerHTML='<li>No visits match the current filters.</li>';$('smT').innerHTML='';$('smL').innerHTML='';return}
@@ -368,7 +369,7 @@ function renderRecords(rows){if(!$('v6').classList.contains('on'))return;
  $('rcChip').hidden=$('rcClr').hidden=!kf;if(kf)$('rcChip').textContent='Showing: '+kf.label;
  $('rcP').textContent=a.length.toLocaleString()+' record'+(a.length===1?'':'s')+' · newest first · follows the filters above';
  $('rcPg').textContent='Page '+(rcPage+1)+' of '+pages;$('rcPrev').disabled=rcPage<=0;$('rcNext').disabled=rcPage>=pages-1;
- $('rcT').innerHTML='<tr class="hd"><th>Date</th><th>District</th><th>Block</th><th>Visit type</th><th>Level</th><th>Designation</th><th>Team</th><th>Monitor</th><th>Location</th></tr>'+(a.length?a.slice(rcPage*PS,rcPage*PS+PS).map((r,i)=>`<tr data-ri="${rcPage*PS+i}"><td data-label="Date">${esc(L.date[r[0]])}</td><td data-label="District">${esc(L.dist[r[1]])}</td><td data-label="Block">${esc(L.blk[r[9]])}</td><td data-label="Visit type">${esc(L.vtype[r[2]])}</td><td data-label="Level">${esc(L.level[r[3]])}</td><td data-label="Designation">${esc(L.desig[r[4]])}</td><td data-label="Team">${esc(L.team[r[5]])}</td><td data-label="Monitor">${esc(L.name[r[6]])}</td><td data-label="Location">${r[7]?`<span data-geo="${GEO.key(r)}"><span class="${GEO.name(r)?'':'mut'}">${esc(GEO.name(r)||'Locating…')}</span><br><small class="mut">${(r[7]/100).toFixed(2)}, ${(r[8]/100).toFixed(2)}</small></span>`:'—'}</td></tr>`).join(''):'<tr><td colspan="9" class="mut">No records match.</td></tr>');GEO.want(a.slice(rcPage*PS,rcPage*PS+PS))}
+ $('rcT').innerHTML='<tr class="hd"><th>Date</th><th>District</th><th>Block</th><th>Visit type</th><th>Level</th><th>Designation</th><th>Team</th><th>Monitor</th><th>Location</th><th></th></tr>'+(a.length?a.slice(rcPage*PS,rcPage*PS+PS).map((r,i)=>`<tr data-ri="${rcPage*PS+i}"><td data-label="Date">${esc(L.date[r[0]])}</td><td data-label="District">${esc(L.dist[r[1]])}</td><td data-label="Block">${esc(L.blk[r[9]])}</td><td data-label="Visit type">${esc(L.vtype[r[2]])}</td><td data-label="Level">${esc(L.level[r[3]])}</td><td data-label="Designation">${esc(L.desig[r[4]])}</td><td data-label="Team">${esc(L.team[r[5]])}</td><td data-label="Monitor">${esc(L.name[r[6]])}</td><td data-label="Location">${r[7]?`<span data-geo="${GEO.key(r)}"><span class="${GEO.name(r)?'':'mut'}">${esc(GEO.name(r)||'Locating…')}</span><br><small class="mut">${(r[7]/100).toFixed(2)}, ${(r[8]/100).toFixed(2)}</small></span>`:'—'}</td><td data-label="Details"><button class="btn rv">View</button></td></tr>`).join(''):'<tr><td colspan="10" class="mut">No records match.</td></tr>');GEO.want(a.slice(rcPage*PS,rcPage*PS+PS))}
 function showRec(r){const E=esc,nm=L.name[r[6]],pl=GEO.name(r),dt=L.date[r[0]],wd=dt&&dt!=='na'?new Date(dt+'T00:00:00').toLocaleDateString(undefined,{weekday:'long'}):'';
  const mine=R.filter(x=>x[6]===r[6]).sort((x,y)=>L.date[x[0]]<L.date[y[0]]?1:-1),last5=mine.slice(0,6).filter(x=>x!==r).slice(0,5);
  const ll=r[7]?`${(r[7]/100).toFixed(2)}, ${(r[8]/100).toFixed(2)}`:'';
@@ -379,7 +380,18 @@ function showRec(r){const E=esc,nm=L.name[r[6]],pl=GEO.name(r),dt=L.date[r[0]],w
  <dt>Location</dt><dd>${r[7]?E(pl||'Locating…')+'<br><small class="mut">'+ll+' (approx.)</small><br><a href="https://www.google.com/maps?q='+(r[7]/100)+','+(r[8]/100)+'" target="_blank" rel="noopener" style="color:var(--accent)">Open in Maps ↗</a>':'Not geo-tagged'}</dd></dl>
  <h3>${E(nm)} — ${mine.length.toLocaleString()} visit${mine.length===1?'':'s'} in total${mine[0]?' · last '+E(L.date[mine[0][0]]):''}</h3>
  <div class="rl">${last5.length?last5.map(x=>`<div>${E(L.date[x[0]])} · ${E(L.vtype[x[2]])} · ${E(L.blk[x[9]])}${x[7]?'':' · <span class="mut">no geo</span>'}</div>`).join(''):'<div class="mut">No other visits.</div>'}</div>`;
- $('rd').hidden=false;$('rdX').onclick=()=>$('rd').hidden=true}
+ $('rdc').insertAdjacentHTML('beforeend','<h3>Full visit details (as in the uploaded CSV)</h3><div id="rdF" class="mut">Loading…</div>');
+ $('rd').hidden=false;$('rdX').onclick=()=>$('rd').hidden=true;loadDet(r)}
+const DET={};
+async function loadDet(r){const box=$('rdF'),key=r[10]+'|'+L.date[r[0]]+'|'+L.name[r[6]];
+ const draw=x=>{if(!$('rdF')||$('rdF')!==box)return;const ks=x?Object.keys(x):[];
+  if(!ks.length){box.innerHTML='Full CSV details were not stored for this visit. Upload the CSV again with <b>Add new rows</b> to fill them in (State admin).';return}
+  box.className='';box.innerHTML='<input id="rdQ" placeholder="Search fields or values…" autocomplete="off"><div class="rf" id="rdL"></div>';
+  const paint=q=>{q=(q||'').toLowerCase();$('rdL').innerHTML=ks.filter(k=>!q||(k+' '+x[k]).toLowerCase().includes(q)).map(k=>`<div>${esc(k)}</div><div>${esc(x[k])}</div>`).join('')||'<div>No match</div><div></div>'};paint('');$('rdQ').oninput=e=>paint(e.target.value)};
+ if(r[10]==null){box.textContent='Sync the data once (Admin → Force full re-download, or reopen the app online) to enable full details.';return}
+ if(key in DET)return draw(DET[key]);
+ try{const j=await api('detail',{row:r[10],chk:L.date[r[0]]+'|'+L.name[r[6]]});DET[key]=j.extra;draw(j.extra)}
+ catch(e){if($('rdF')===box)box.textContent=netErr(e)?'Offline — full details need a connection.':e.message}}
 $('rcT').addEventListener('click',e=>{const tr=e.target.closest('tr[data-ri]');if(!tr||e.target.closest('a'))return;const r=rcA[+tr.dataset.ri];if(r)showRec(r)});
 $('rd').addEventListener('click',e=>{if(e.target===$('rd'))$('rd').hidden=true});addEventListener('keydown',e=>{if(e.key==='Escape')$('rd').hidden=true});
 $('rcQ').oninput=()=>{rcPage=0;renderRecords(cur)};$('rcClr').onclick=()=>{kf=null;rcPage=0;renderRecords(cur)};
@@ -412,13 +424,14 @@ $('dcsv').onclick=()=>dl('csv');$('dxl').onclick=()=>dl('xlsx');
 
 /* ═════ ADMIN (State only): upload → cloud, users ═════ */
 const AL={date:['visit_detail-cdate','Date'],d1:['monitor-district1'],d2:['visit_detail-district2','District'],blk:['visit_detail-block2','Block'],b1:['monitor-block1'],vtype:['visit_detail-visit_type','Visit type'],level:['monitor-level','Level'],desig:['monitor-designation1','Designation'],team:['visit-visit_team','Team'],name:['monitor-name1','Monitor'],lat:['visit_detail-geo_location-Latitude','Latitude'],lon:['visit_detail-geo_location-Longitude','Longitude']};
-const KEEP=[].concat(...Object.values(AL)),prune=x=>{const o={};KEEP.forEach(k=>{if(x[k]!==undefined)o[k]=x[k]});return o};
+const KEEP=[].concat(...Object.values(AL)),KS=new Set(KEEP),prune=x=>{const o={},e={};for(const k in x){let v=x[k];if(v===undefined||v===null||v==='')continue;if(v instanceof Date)v=new Date(v.getTime()-v.getTimezoneOffset()*6e4).toISOString().replace('T',' ').slice(0,19);if(typeof v==='string'&&v.length>500)v=v.slice(0,500);e[k]=v;if(KS.has(k))o[k]=x[k]}
+  let j=JSON.stringify(e);if(j.length>45000){for(const k in e)if(typeof e[k]==='string')e[k]=e[k].slice(0,100);j=JSON.stringify(e).slice(0,45000)}o.__x=j;return o};
 const pick=(r,ks)=>{for(const k of ks){const v=r[k];if(v!==undefined&&v!==null&&v!=='')return v}return ''};
 function parseRecs(recs){const T=[];let skip=0;
   for(const r of recs){let d=pick(r,AL.date);d=d instanceof Date?new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10):String(d).slice(0,10);
    if(!/^\d{4}-\d{2}-\d{2}$/.test(d)){skip++;continue}
    const s=k=>String(pick(r,AL[k])).trim(),la=parseFloat(pick(r,AL.lat)),lo=parseFloat(pick(r,AL.lon)),ok=la>=17.5&&la<=22.7&&lo>=81&&lo<=87.7;
-   T.push([d,s('d2')||s('d1')||'Unknown',s('blk')||s('b1')||'Unspecified',s('vtype')||'na',s('level')||'na',s('desig').replace(/_/g,' ')||'other',s('team')||'na',(s('name')||'Unknown').toLowerCase().replace(/\b\w/g,c=>c.toUpperCase()),ok?Math.round(la*100):0,ok?Math.round(lo*100):0])}
+   T.push([d,s('d2')||s('d1')||'Unknown',s('blk')||s('b1')||'Unspecified',s('vtype')||'na',s('level')||'na',s('desig').replace(/_/g,' ')||'other',s('team')||'na',(s('name')||'Unknown').toLowerCase().replace(/\b\w/g,c=>c.toUpperCase()),ok?Math.round(la*100):0,ok?Math.round(lo*100):0,r.__x||''])}
   return{T,skip}}
 $('up').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f||!isState())return;staged=null;$('upRep').disabled=$('upApp').disabled=true;$('upP').hidden=false;$('prog').textContent='';$('barI').style.width='0';$('upInfo').textContent='Reading '+f.name+' …';
   const done=recs=>{setTimeout(()=>{const p=parseRecs(recs);if(!p.T.length){$('upInfo').textContent='No usable rows (need a visit date column in YYYY-MM-DD).';return}
@@ -427,21 +440,20 @@ $('up').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f||!isState
   else{const fr=new FileReader();fr.onload=()=>{try{const wb=XLSX.read(fr.result,{type:'array',cellDates:true});done(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''}).map(prune))}catch(x){$('upInfo').textContent='Could not read file: '+x.message}};fr.readAsArrayBuffer(f)}};
 async function push(mode){if(!staged)return;
   if(mode==='replace'&&!confirm('Replace ALL cloud data with these '+staged.length.toLocaleString()+' rows? District users will see the new data on their next sync.'))return;
-  $('upRep').disabled=$('upApp').disabled=true;const N=3000,bar=$('barI');
+  $('upRep').disabled=$('upApp').disabled=true;const N=400,bar=$('barI');
   try{for(let i=0;i<staged.length;i+=N){$('prog').textContent=`Uploading ${Math.min(i+N,staged.length).toLocaleString()} / ${staged.length.toLocaleString()} …`;bar.style.width=(100*Math.min(i+N,staged.length)/staged.length*.9)+'%';await api('stage',{rows:staged.slice(i,i+N),reset:i===0})}
     $('prog').textContent='Merging into the cloud sheet …';const j=await api('commit',{mode});bar.style.width='100%';
-    $('prog').textContent=`Done: ${j.added.toLocaleString()} rows added`+(j.skipped?`, ${j.skipped.toLocaleString()} duplicates skipped`:'')+` · cloud now holds ${j.total.toLocaleString()} rows.`;staged=null;$('upInfo').textContent='';await sync(true)}
+    $('prog').textContent=`Done: ${j.added.toLocaleString()} rows added`+(j.skipped?`, ${j.skipped.toLocaleString()} duplicates skipped`:'')+(j.filled?`, full details filled for ${j.filled.toLocaleString()} existing rows`:'')+` · cloud now holds ${j.total.toLocaleString()} rows.`;staged=null;$('upInfo').textContent='';await sync(true)}
   catch(x){$('prog').textContent='Upload failed: '+x.message+' — nothing was changed in the live data unless the merge step had started.';$('upRep').disabled=$('upApp').disabled=false}}
 $('upRep').onclick=()=>push('replace');$('upX').onclick=()=>{$('upP').hidden=true;staged=null};$('upApp').onclick=()=>push('append');$('fsync').onclick=()=>sync(true);
 function cloudInfo(){if(!isState())return;$('cloudInfo').textContent=meta.total!=null?`Cloud sheet holds ${Number(meta.total).toLocaleString()} visits · last updated ${meta.at?new Date(meta.at).toLocaleString():'—'}`:''}
 let users=[];
 async function openAdmin(){cloudInfo();$('dl').innerHTML=L.dist.map(d=>`<option value="${esc(d)}">`).join('');await loadUsers()}
-async function loadUsers(){try{users=(await api('users')).users;
+async function loadUsers(){try{const j=await api('users');if(!Array.isArray(j.users))throw new Error('Server sent no user list'+(j.error?': '+j.error:'')+'. Deploy the latest Code.gs as a New version (Deploy → Manage deployments → Edit → New version).');users=j.users;
   const BM={};R.forEach(r=>{const d=String(L.dist[r[1]]).trim().toLowerCase(),b=L.blk[r[9]],dt=L.date[r[0]]||'',o=(BM[d]=BM[d]||{})[b]=(BM[d]||{})[b]||{n:0,l:''};o.n++;if(dt>o.l)o.l=dt});
   $('ut').innerHTML='<tr><th>User</th><th>Name</th><th>Role</th><th>District</th><th>Active</th><th>Last login</th><th></th></tr>'+users.map((u,i)=>{const bm=u.role==='district'?BM[String(u.district).trim().toLowerCase()]:null,bk=bm?Object.keys(bm).sort():[];
-   return `<tr><td>${esc(u.username)}</td><td>${esc(u.name)}</td><td>${esc(u.role)}</td><td>${esc(u.district)}</td><td>${u.active?'✔':'✖'}</td><td>${u.lastLogin?new Date(u.lastLogin).toLocaleDateString():'—'}</td><td><button class="btn" data-i="${i}">Edit</button>${u.role==='district'?` <button class="btn" data-t="${i}">Blocks ▸</button>`:''}</td></tr>`+
+   return `<tr><td>${esc(u.username)}</td><td>${esc(u.name)}</td><td>${esc(u.role)}</td><td>${esc(u.district)}</td><td>${u.active?'✔':'✖'}</td><td>${u.lastLogin?new Date(u.lastLogin).toLocaleDateString():'—'}</td><td>${u.role==='district'?`<button class="btn" data-t="${i}">Blocks ▸</button>`:''}</td></tr>`+
    (u.role==='district'?`<tr id="bk${i}" hidden><td colspan="7"><div class="mut" style="margin-bottom:4px">Blocks sign in through this district account (${u.lastLogin?'last login '+new Date(u.lastLogin).toLocaleDateString():'never signed in'}). Block activity from visit data:</div>${bk.length?bk.map(b=>`<div>${esc(b)} — ${bm[b].n.toLocaleString()} visits · last ${esc(bm[b].l||'—')}</div>`).join(''):'<div class="mut">No visit data for this district yet.</div>'}</td></tr>`:'');}).join('');
-  $('ut').querySelectorAll('button[data-i]').forEach(b=>b.onclick=()=>editUser(users[b.dataset.i]));
   $('ut').querySelectorAll('button[data-t]').forEach(b=>b.onclick=()=>{const r=$('bk'+b.dataset.t);r.hidden=!r.hidden;b.textContent=r.hidden?'Blocks ▸':'Blocks ▾'})}catch(e){$('ut').innerHTML='<tr><td>'+esc(e.message)+'</td></tr>'}}
 function editUser(u){$('uForm').hidden=!u;if(u)setTimeout(()=>$('uForm').scrollIntoView({behavior:'smooth',block:'nearest'}),0);$('uFT').textContent=u?'Edit user — '+u.username:'Add user';$('uU').value=u?u.username:'';$('uU').readOnly=!!u;$('uN').value=u?u.name:'';$('uR').value=u?u.role:'district';$('uD').value=u?u.district:'';$('uP').value='';$('uA').checked=u?u.active:true;$('uPh').textContent=u?'(leave blank to keep)':'(min 8)';roleUI()}
 function roleUI(){$('uDW').hidden=$('uR').value!=='district'}$('uR').onchange=roleUI;$('uC').onclick=()=>editUser(null);editUser(null);
