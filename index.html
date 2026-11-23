@@ -152,7 +152,7 @@ const netErr=e=>e instanceof TypeError||!navigator.onLine;
 (function(){const s=$('lu'),w=$('luoW'),tg=()=>{w.style.display=s.value==='__other'?'grid':'none'};try{const v=localStorage.getItem('smp_lu');if(v&&[...s.options].some(o=>o.value===v))s.value=v}catch(e){}tg();s.addEventListener('change',()=>{tg();try{localStorage.setItem('smp_lu',s.value)}catch(e){}})})();
 $('lgForm').onsubmit=async e=>{e.preventDefault();$('lgErr').textContent='';$('lgBtn').disabled=true;$('lgBtn').textContent='Signing in…';
   try{const j=await api('login',{u:($('lu').value==='__other'?$('luo').value:$('lu').value).trim(),p:$('lp').value});S={token:j.token,user:j.user};localStorage.setItem('smp_s',JSON.stringify(S));$('lp').value='';await enter()}
-  catch(x){$('lgErr').textContent=netErr(x)?'No connection. You need internet for the first sign-in.':x.message}
+  catch(x){$('lgErr').textContent=netErr(x)?(navigator.onLine?'Cannot reach the server. Check that the Apps Script deployment access is set to Anyone, and that API_URL is the /exec URL.':'No connection. You need internet for the first sign-in.'):x.message}
   $('lgBtn').disabled=false;$('lgBtn').textContent='Sign in'};
 function wipeUI(){['kpi','mx','mt','ut','cloudInfo','upInfo','prog','vw','who','dist','vt','lv','ds'].forEach(i=>{$(i).innerHTML=''});
   Object.keys(cs).forEach(k=>{try{cs[k].destroy()}catch(e){}delete cs[k]});const cv=$('map'),g=cv.getContext('2d');g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,cv.width,cv.height);
