@@ -17,9 +17,9 @@ html{-webkit-text-size-adjust:100%}body{-webkit-tap-highlight-color:transparent;
 .mut{color:var(--muted)}
 header{display:flex;align-items:center;gap:10px;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top,0px));background:var(--panel);border-bottom:1px solid var(--border);flex-wrap:wrap;position:sticky;top:0;z-index:5}
 header{background:var(--bg);color:var(--text);border-bottom:3px solid var(--accent)}header .pill,#who,#vw{color:var(--muted)}
-.net{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--text)}.net i{width:8px;height:8px;border-radius:50%;background:var(--ok)}.net.off i{background:#f59e0b}.net.off b{color:#f59e0b}
+.net{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--text)}.net i{width:8px;height:8px;border-radius:50%;background:var(--accent)}.net.off i{background:var(--bad)}.net.off b{color:var(--bad)}
 header h1{font-size:15px;margin:0 auto 0 0;font-weight:600}header h1 span{color:var(--accent)}
-.pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);border:1px solid var(--border);border-radius:99px;padding:3px 9px}.pill i{width:7px;height:7px;border-radius:50%;background:var(--ok)}.pill.off i{background:#f59e0b}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);border:1px solid var(--border);border-radius:99px;padding:3px 9px}.pill i{width:7px;height:7px;border-radius:50%;background:var(--accent)}.pill.off i{background:var(--bad)}
 #who,#vw{font-size:12px;color:var(--muted)}#who b,#vw b{color:var(--accent)}
 .hb{background:none;color:var(--accent);border:1px solid var(--border);border-radius:8px;padding:5px 10px;cursor:pointer;font:inherit;min-height:32px}
 .switcher{display:flex;gap:8px;width:100%;overflow-x:auto}
@@ -108,6 +108,7 @@ th,td{padding:8px 8px;font-size:12.5px}
 #upd .ring.spin svg{animation:upsp 1s linear infinite}@keyframes upsp{to{transform:rotate(270deg)}}
 #upd.done{border-color:var(--ok)}#upd.done .fg{stroke:var(--ok)}
 #updB{display:flex;gap:6px}
+#upW[hidden]{display:none}
 </style></head><body>
 
 <!-- LOGIN / COVER -->
@@ -138,13 +139,17 @@ th,td{padding:8px 8px;font-size:12.5px}
 <div id="app" hidden>
 <header><h1>SamMPurna <span>Field Visit Monitoring</span> — Odisha NHM</h1>
   <span class="net" id="netW"><i></i><b id="netT">Online</b></span><span class="pill" id="pill"><i></i><span id="src">—</span></span><span id="who"></span>
-  <button class="hb" id="inst" hidden>⬇ Install</button><button class="hb" id="syn">⟳ Sync</button><button class="hb" id="chpw">Password</button><button class="hb" id="out">Sign out</button>
+  <button class="hb" id="inst" hidden>⬇ Install</button><button class="hb" id="syn">⟳ Sync</button><button class="hb" id="out" title="Sign out" aria-label="Sign out">⏻</button>
   <div class="switcher" id="tabs"><button class="active" data-v="v1">Overview</button><button data-v="v2" id="tMx">District / Block Matrix</button><button data-v="v3">Monitors</button><button data-v="v4" id="tAdmin" hidden>Admin</button><button data-v="v5" id="tSum">Summary</button><button data-v="v6" id="tRec">Records</button></div></header>
 <div class="f" id="fbar"><span id="vw" style="align-self:center;width:100%"></span><button type="button" id="ftog">⚙ Filters ▾</button>
 <label>Visit date from<input type="date" id="from"></label><label>Visit date to<input type="date" id="to"></label>
 <label id="distWrap">District<select id="dist"></select></label><label>Visit type<select id="vt"></select></label>
 <label>Level<select id="lv"></select></label><label>Designation<select id="ds"></select></label><button id="rs">Reset</button>
-<label>Export<select id="dset"><option value="visits">Filtered visits</option><option value="matrix">Block matrix</option><option value="monitors">Monitors</option></select></label><button id="dcsv">⬇ CSV</button><button id="dxl">⬇ XLSX</button></div>
+<label class="up" id="upW" hidden>⬆ Upload CSV / XLSX<input type="file" id="up" accept=".csv,.xlsx,.xls" hidden></label><label>Export<select id="dset"><option value="visits">Filtered visits</option><option value="matrix">Block matrix</option><option value="monitors">Monitors</option></select></label><button id="dcsv">⬇ CSV</button><button id="dxl">⬇ XLSX</button></div>
+
+<div class="c" id="upP" hidden style="margin:10px 16px 0"><h2 style="margin-top:0">Upload visits</h2><span id="upInfo" class="mut"></span>
+  <div class="row"><button class="btn p" id="upApp" disabled>Add new rows (skip duplicates)</button><button class="btn" id="upRep" disabled>Replace all cloud data</button><button class="btn" id="upX">Close</button></div>
+  <div class="bar"><i id="barI"></i></div><div class="mut" id="prog" style="margin-top:4px"></div></div>
 
 <div class="v on" id="v1"><div class="k" id="kpi"></div>
 <div class="c"><h2>Visits per day</h2><div class="ch"><canvas id="c1"></canvas></div></div>
@@ -165,9 +170,8 @@ th,td{padding:8px 8px;font-size:12.5px}
 <div style="display:flex;gap:10px;align-items:center;justify-content:center"><button class="btn" id="rcPrev">‹ Prev</button><span class="mut" id="rcPg"></span><button class="btn" id="rcNext">Next ›</button></div></div>
 <div class="v" id="v4">
   <div class="c"><h2>Cloud data</h2><div id="cloudInfo" class="mut"></div>
-    <div class="row"><label class="up">⬆ Choose CSV / XLSX<input type="file" id="up" accept=".csv,.xlsx,.xls" hidden></label><span id="upInfo" class="mut"></span></div>
-    <div class="row"><button class="btn p" id="upRep" disabled>Replace all cloud data</button><button class="btn" id="upApp" disabled>Append new rows only</button><button class="btn" id="fsync">Force full re-download</button></div>
-    <div class="bar"><i id="barI"></i></div><div class="mut" id="prog" style="margin-top:4px"></div></div>
+    <div class="row"><button class="btn" id="fsync">Force full re-download</button></div>
+    <div class="mut">To add data, use <b>⬆ Upload CSV / XLSX</b> under Filters. New uploads are added and duplicates are skipped.</div></div>
   <div class="c"><h2>Users</h2><div class="w" style="max-height:260px"><table id="ut"></table></div>
     <div id="uForm" hidden><h2 id="uFT" style="margin-top:14px">Edit user</h2>
     <div class="fm">
@@ -228,7 +232,7 @@ $('lgForm').onsubmit=async e=>{e.preventDefault();$('lgErr').textContent='';$('l
   $('lgBtn').disabled=false;$('lgBtn').textContent='Sign in'};
 function wipeUI(){['kpi','mx','mt','ut','cloudInfo','upInfo','prog','vw','who','dist','vt','lv','ds'].forEach(i=>{$(i).innerHTML=''});
   Object.keys(cs).forEach(k=>{try{cs[k].destroy()}catch(e){}delete cs[k]});const cv=$('map'),g=cv.getContext('2d');g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,cv.width,cv.height);
-  cur=[];mxA=[];mtA=[];users=[];staged=null;kf=null;rcPage=0;$('rcQ').value='';$('rcT').innerHTML='';$('smK').innerHTML='';open_.clear();$('from').value=$('to').value='';$('barI').style.width='0'}
+  cur=[];mxA=[];mtA=[];users=[];staged=null;$('upP').hidden=true;kf=null;rcPage=0;$('rcQ').value='';$('rcT').innerHTML='';$('smK').innerHTML='';open_.clear();$('from').value=$('to').value='';$('barI').style.width='0'}
 async function logout(){localStorage.removeItem('smp_s');S=null;L=EMPTY();R=[];ver='';meta={};wipeUI();try{await idb.clear()}catch(e){}
   $('app').hidden=true;$('lg').hidden=false;$('pw').hidden=true}
 $('out').onclick=()=>logout();
@@ -236,7 +240,7 @@ $('out').onclick=()=>logout();
 /* ═════ enter app / role-based UI ═════ */
 function applyRole(){const u=S.user,st=isState();
   $('who').innerHTML=esc(u.name||u.username)+' · <b>'+(st?'State':'District · '+esc(u.district))+'</b>';
-  $('tAdmin').hidden=!st;$('distWrap').hidden=!st;
+  $('tAdmin').hidden=!st;$('distWrap').hidden=!st;$('upW').hidden=!st;
   $('tMx').textContent=st?'District / Block Matrix':'Block Matrix';
   document.querySelectorAll('#tabs button').forEach((b,i)=>b.classList.toggle('active',i===0));
   document.querySelectorAll('.v').forEach(v=>v.classList.toggle('on',v.id==='v1'));$('fbar').hidden=false}
@@ -325,16 +329,34 @@ function renderSummary(rows){const n=rows.length,E=s=>String(s).replace(/[&<>"]/
  const old=Object.entries(dl).sort((a,b)=>a[1].localeCompare(b[1])).slice(0,5);
  $('smL').innerHTML='<tr><th>'+UC+'</th><th class="n">Last visit</th><th class="n">Days before latest</th></tr>'+old.map(x=>`<tr><td>${E(NM[x[0]])}</td><td class="n">${x[1]}</td><td class="n">${Math.round((new Date(last)-new Date(x[1]))/day)}</td></tr>`).join('')}
 
+/* ═════ place names for geo-tagged records (reverse geocoding, cached on device) ═════ */
+const GEO={m:{},q:[],busy:false,loaded:null,dirty:false,
+ key:r=>r[7]+','+r[8],
+ async load(){if(!this.loaded)this.loaded=(async()=>{try{this.m=(await idb.get('geo'))||{}}catch(e){this.m={}}})();return this.loaded},
+ name(r){return r[7]?(this.m[this.key(r)]||''):''},
+ async want(rows){await this.load();this.paint();let add=false;rows.forEach(r=>{if(!r[7])return;const k=this.key(r);if(this.m[k]===undefined&&!this.q.some(x=>x[0]===k)){this.q.push([k,r[7]/100,r[8]/100]);add=true}});if(add&&!this.busy)this.run()},
+ async run(){this.busy=true;
+  while(this.q.length){if(!navigator.onLine)break;const [k,la,lo]=this.q.shift();
+   try{const x=await fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=14&addressdetails=1&accept-language=en&lat='+la+'&lon='+lo);
+    if(x.status===429||x.status>=500){this.q.unshift([k,la,lo]);await new Promise(r=>setTimeout(r,5000));continue}
+    const j=await x.json(),a=j.address||{},
+     nm=[a.village||a.suburb||a.town||a.hamlet||a.neighbourhood||a.city_district||a.city||a.locality,a.county||a.state_district].filter((v,i,A)=>v&&A.indexOf(v)===i).join(', ')||(j.display_name||'').split(',').slice(0,2).join(',').trim();
+    this.m[k]=nm||'Unknown place';this.dirty=true;this.paint()}
+   catch(e){this.q.unshift([k,la,lo]);break}                      /* offline / blocked: stop quietly, retry on next render */
+   await new Promise(r=>setTimeout(r,1100))}                         /* Nominatim policy: max 1 request per second */
+  this.busy=false;if(this.dirty){this.dirty=false;try{await idb.set('geo',this.m)}catch(e){}}},
+ paint(){document.querySelectorAll('#rcT [data-geo]').forEach(td=>{const n=this.m[td.dataset.geo],i=td.firstChild;if(n&&i){i.textContent=n;i.classList.remove('mut')}})}};
+window.addEventListener('online',()=>{if(GEO.q.length&&!GEO.busy)GEO.run()});
 let kf=null,rcPage=0;const PS=50;
 function renderRecords(rows){if(!$('v6').classList.contains('on'))return;
  let a=kf?rows.filter(kf.fn):rows;const q=$('rcQ').value.trim().toLowerCase();
- if(q)a=a.filter(r=>(L.name[r[6]]+' '+L.dist[r[1]]+' '+L.blk[r[9]]+' '+L.vtype[r[2]]+' '+L.desig[r[4]]+' '+L.level[r[3]]).toLowerCase().includes(q));
+ if(q)a=a.filter(r=>(L.name[r[6]]+' '+L.dist[r[1]]+' '+L.blk[r[9]]+' '+L.vtype[r[2]]+' '+L.desig[r[4]]+' '+L.level[r[3]]+' '+GEO.name(r)).toLowerCase().includes(q));
  a=a.slice().sort((x,y)=>L.date[x[0]]<L.date[y[0]]?1:L.date[x[0]]>L.date[y[0]]?-1:0);
  const pages=Math.max(1,Math.ceil(a.length/PS));rcPage=Math.min(rcPage,pages-1);
  $('rcChip').hidden=$('rcClr').hidden=!kf;if(kf)$('rcChip').textContent='Showing: '+kf.label;
  $('rcP').textContent=a.length.toLocaleString()+' record'+(a.length===1?'':'s')+' · newest first · follows the filters above';
  $('rcPg').textContent='Page '+(rcPage+1)+' of '+pages;$('rcPrev').disabled=rcPage<=0;$('rcNext').disabled=rcPage>=pages-1;
- $('rcT').innerHTML='<tr class="hd"><th>Date</th><th>District</th><th>Block</th><th>Visit type</th><th>Level</th><th>Designation</th><th>Team</th><th>Monitor</th><th>Location</th></tr>'+(a.length?a.slice(rcPage*PS,rcPage*PS+PS).map(r=>`<tr><td data-label="Date">${esc(L.date[r[0]])}</td><td data-label="District">${esc(L.dist[r[1]])}</td><td data-label="Block">${esc(L.blk[r[9]])}</td><td data-label="Visit type">${esc(L.vtype[r[2]])}</td><td data-label="Level">${esc(L.level[r[3]])}</td><td data-label="Designation">${esc(L.desig[r[4]])}</td><td data-label="Team">${esc(L.team[r[5]])}</td><td data-label="Monitor">${esc(L.name[r[6]])}</td><td data-label="Location">${r[7]?(r[7]/100).toFixed(2)+', '+(r[8]/100).toFixed(2):'—'}</td></tr>`).join(''):'<tr><td colspan="9" class="mut">No records match.</td></tr>')}
+ $('rcT').innerHTML='<tr class="hd"><th>Date</th><th>District</th><th>Block</th><th>Visit type</th><th>Level</th><th>Designation</th><th>Team</th><th>Monitor</th><th>Location</th></tr>'+(a.length?a.slice(rcPage*PS,rcPage*PS+PS).map(r=>`<tr><td data-label="Date">${esc(L.date[r[0]])}</td><td data-label="District">${esc(L.dist[r[1]])}</td><td data-label="Block">${esc(L.blk[r[9]])}</td><td data-label="Visit type">${esc(L.vtype[r[2]])}</td><td data-label="Level">${esc(L.level[r[3]])}</td><td data-label="Designation">${esc(L.desig[r[4]])}</td><td data-label="Team">${esc(L.team[r[5]])}</td><td data-label="Monitor">${esc(L.name[r[6]])}</td><td data-label="Location">${r[7]?`<span data-geo="${GEO.key(r)}"><span class="${GEO.name(r)?'':'mut'}">${esc(GEO.name(r)||'Locating…')}</span><br><small class="mut">${(r[7]/100).toFixed(2)}, ${(r[8]/100).toFixed(2)}</small></span>`:'—'}</td></tr>`).join(''):'<tr><td colspan="9" class="mut">No records match.</td></tr>');GEO.want(a.slice(rcPage*PS,rcPage*PS+PS))}
 $('rcQ').oninput=()=>{rcPage=0;renderRecords(cur)};$('rcClr').onclick=()=>{kf=null;rcPage=0;renderRecords(cur)};
 $('rcPrev').onclick=()=>{rcPage--;renderRecords(cur)};$('rcNext').onclick=()=>{rcPage++;renderRecords(cur)};
 function kpiGo(k){const go=v=>document.querySelector('#tabs [data-v="'+v+'"]').click();
@@ -354,7 +376,7 @@ $('rs').onclick=()=>{['dist','vt','lv','ds'].forEach(i=>$(i).value='');$('from')
 /* ═════ export (works on GitHub Pages / installed PWA) ═════ */
 const cell=v=>{v=v==null?'':String(v);return /[",\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
 const toCSV=a=>'\ufeff'+a.map(r=>r.map(cell).join(',')).join('\r\n');
-const visitsA=()=>{const a=[['Date','District','Block','Visit type','Level','Designation','Team','Monitor','Latitude','Longitude']];cur.forEach(r=>a.push([L.date[r[0]],L.dist[r[1]],L.blk[r[9]],L.vtype[r[2]],L.level[r[3]],L.desig[r[4]],L.team[r[5]],L.name[r[6]],r[7]?r[7]/100:'',r[8]?r[8]/100:'']));return a};
+const visitsA=()=>{const a=[['Date','District','Block','Visit type','Level','Designation','Team','Monitor','Place','Latitude','Longitude']];cur.forEach(r=>a.push([L.date[r[0]],L.dist[r[1]],L.blk[r[9]],L.vtype[r[2]],L.level[r[3]],L.desig[r[4]],L.team[r[5]],L.name[r[6]],GEO.name(r),r[7]?r[7]/100:'',r[8]?r[8]/100:'']));return a};
 const SETS={visits:['Visits',visitsA],matrix:['Matrix',()=>mxA],monitors:['Monitors',()=>mtA]};
 function saveBlob(name,blob){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500)}
 function dl(fmt){const k=$('dset').value,a=SETS[k][1](),tag=isState()?'state':S.user.district.toLowerCase().replace(/\W+/g,'_'),sl=s=>String(s).trim().replace(/[^\w]+/g,'_').replace(/^_+|_+$/g,''),sel=id=>{const e=$(id);return e&&e.value!==''?sl(e.selectedOptions[0].text):''},rng=($('from').value!==F0||$('to').value!==F1)?$('from').value+'_to_'+$('to').value:'',name=['field_visits',k,sel('dist')||tag,sel('vt'),sel('lv'),sel('ds'),rng,new Date().toISOString().slice(0,10)].filter(Boolean).join('_')+'.'+fmt;
@@ -373,9 +395,9 @@ function parseRecs(recs){const T=[];let skip=0;
    const s=k=>String(pick(r,AL[k])).trim(),la=parseFloat(pick(r,AL.lat)),lo=parseFloat(pick(r,AL.lon)),ok=la>=17.5&&la<=22.7&&lo>=81&&lo<=87.7;
    T.push([d,s('d2')||s('d1')||'Unknown',s('blk')||s('b1')||'Unspecified',s('vtype')||'na',s('level')||'na',s('desig').replace(/_/g,' ')||'other',s('team')||'na',(s('name')||'Unknown').toLowerCase().replace(/\b\w/g,c=>c.toUpperCase()),ok?Math.round(la*100):0,ok?Math.round(lo*100):0])}
   return{T,skip}}
-$('up').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;staged=null;$('upRep').disabled=$('upApp').disabled=true;$('upInfo').textContent='Reading '+f.name+' …';
+$('up').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;staged=null;$('upRep').disabled=$('upApp').disabled=true;$('upP').hidden=false;$('prog').textContent='';$('barI').style.width='0';$('upInfo').textContent='Reading '+f.name+' …';
   const done=recs=>{setTimeout(()=>{const p=parseRecs(recs);if(!p.T.length){$('upInfo').textContent='No usable rows (need a visit date column in YYYY-MM-DD).';return}
-    staged=p.T;$('upInfo').textContent=`${f.name}: ${p.T.length.toLocaleString()} valid rows`+(p.skip?` · ${p.skip.toLocaleString()} skipped (no valid date)`:'');$('upRep').disabled=$('upApp').disabled=false},30)};
+    staged=p.T;$('upInfo').textContent=`${f.name}: ${p.T.length.toLocaleString()} valid rows · rows already in the cloud will be skipped`+(p.skip?` · ${p.skip.toLocaleString()} skipped (no valid date)`:'');$('upRep').disabled=$('upApp').disabled=false},30)};
   if(/\.csv$/i.test(f.name)){const recs=[];Papa.parse(f,{header:true,skipEmptyLines:true,chunk:r=>r.data.forEach(x=>recs.push(prune(x))),complete:()=>done(recs),error:err=>{$('upInfo').textContent='Could not read CSV: '+err}})}
   else{const fr=new FileReader();fr.onload=()=>{try{const wb=XLSX.read(fr.result,{type:'array',cellDates:true});done(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''}).map(prune))}catch(x){$('upInfo').textContent='Could not read file: '+x.message}};fr.readAsArrayBuffer(f)}};
 async function push(mode){if(!staged)return;
@@ -385,7 +407,7 @@ async function push(mode){if(!staged)return;
     $('prog').textContent='Merging into the cloud sheet …';const j=await api('commit',{mode});bar.style.width='100%';
     $('prog').textContent=`Done: ${j.added.toLocaleString()} rows added`+(j.skipped?`, ${j.skipped.toLocaleString()} duplicates skipped`:'')+` · cloud now holds ${j.total.toLocaleString()} rows.`;staged=null;$('upInfo').textContent='';await sync(true)}
   catch(x){$('prog').textContent='Upload failed: '+x.message+' — nothing was changed in the live data unless the merge step had started.';$('upRep').disabled=$('upApp').disabled=false}}
-$('upRep').onclick=()=>push('replace');$('upApp').onclick=()=>push('append');$('fsync').onclick=()=>sync(true);
+$('upRep').onclick=()=>push('replace');$('upX').onclick=()=>{$('upP').hidden=true;staged=null};$('upApp').onclick=()=>push('append');$('fsync').onclick=()=>sync(true);
 function cloudInfo(){if(!isState())return;$('cloudInfo').textContent=meta.total!=null?`Cloud sheet holds ${Number(meta.total).toLocaleString()} visits · last updated ${meta.at?new Date(meta.at).toLocaleString():'—'}`:''}
 let users=[];
 async function openAdmin(){cloudInfo();$('dl').innerHTML=L.dist.map(d=>`<option value="${esc(d)}">`).join('');await loadUsers()}
@@ -398,7 +420,7 @@ $('uS').onclick=async()=>{try{await api('user_save',{username:$('uU').value.trim
 /* ═════ change password ═════ */
 let pwForced=false;
 function openPw(forced){pwForced=!!forced;$('pwT').textContent=forced?'Set your own password':'Change password';$('pwM').textContent=forced?'Your account uses a temporary password. Choose a new one to continue.':'';$('pc').hidden=pwForced;$('pwE').textContent='';$('pwForm').reset();$('pw').hidden=false}
-$('chpw').onclick=()=>openPw(false);$('pc').onclick=()=>$('pw').hidden=true;
+$('pc').onclick=()=>$('pw').hidden=true;
 $('pwForm').onsubmit=async e=>{e.preventDefault();if($('pn').value!==$('pr').value){$('pwE').textContent='New passwords do not match.';return}
   try{const j=await api('pw_change',{old:$('po').value,pw:$('pn').value});S={token:j.token,user:j.user};localStorage.setItem('smp_s',JSON.stringify(S));$('pw').hidden=true;toast('Password changed')}catch(x){$('pwE').textContent=x.message}};
 

@@ -26,8 +26,8 @@ After any later edit of `Code.gs`: **Deploy → Manage deployments → Edit → 
 3. Open the site → sign in as `state` with the password from `district_logins_PRIVATE.csv`.
 
 ## 3. First use
-1. **Admin → Choose CSV/XLSX →** `seed_visits.csv` → **Replace all cloud data**.
-2. Give each district its own row from `district_logins_PRIVATE.csv` (username + password + the site URL). Then delete the file. Everyone can still change their own password with the **Password** button.
+1. State login → **⚙ Filters → ⬆ Upload CSV / XLSX →** `seed_visits.csv` → **Replace all cloud data** (first load only). Later uploads: **Add new rows (skip duplicates)**.
+2. Give each district its own row from `district_logins_PRIVATE.csv` (username + password + the site URL). Then delete the file. The State admin resets passwords in **Admin → Users**; a temporary password still forces a new one at first sign-in.
 3. Install: Android/desktop Chrome shows **Install**; iPhone: Share → Add to Home Screen.
 4. Later: **Admin → Users** to add, reset or deactivate logins. **Create logins for all districts** only adds districts that have none (those get a temporary password they must change).
 
@@ -47,3 +47,9 @@ Edit files, bump `VERSION` in `sw.js`, push. Open apps show "A new version is re
 - The device keeps a copy of that user's data until they tap **Sign out**.
 - Two admins uploading at the same moment can mix chunks; upload one at a time.
 - If every State password is lost: in the Sheet's `Users` tab delete all rows below the header and re-import `users_import.csv`.
+
+## Place names on records
+The Records tab shows a place name (locality, district) above the coordinates for geo-tagged visits. Names are looked up from OpenStreetMap (Nominatim) for the 50 rows on screen, at most 1 per second, and cached on the device (IndexedDB), so each spot is fetched once. Needs internet for the first lookup; cached names work offline. CSV/Excel exports include a **Place** column filled from names already looked up. Search box also matches place names.
+
+## Uploading new data
+Use **⚙ Filters → ⬆ Upload CSV / XLSX** (State only). Pick the file, then **Add new rows (skip duplicates)**. A row counts as a duplicate when all 10 fields match a row already in the cloud (date, district, block, visit type, level, designation, team, monitor, lat, lon). Each existing row cancels one identical uploaded row, so re-uploading the same file adds 0, an overlapping file adds only the new rows, and genuinely repeated identical visits inside one file are kept. **Replace all cloud data** is only for a full reset. After updating `Code.gs`: Deploy → Manage deployments → Edit → New version.
