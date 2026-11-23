@@ -63,7 +63,7 @@ label.up{display:inline-flex;align-items:center;cursor:pointer;border:1px solid 
   <h1>SamMPurna <span>Field Visit Monitoring</span></h1>
   <div class="mut">Odisha NHM · sign in with your State or District account</div>
   <form id="lgForm">
-    <label>Username<input id="lu" autocomplete="username" autocapitalize="none" required></label>
+    <label>State / District<select id="lu"><option value="state">State (Admin)</option><option value="anugul">Anugul District</option><option value="balasore">Balasore District</option><option value="baragarh">Baragarh District</option><option value="bhadrak">Bhadrak District</option><option value="bolangir">Bolangir District</option><option value="boudh">Boudh District</option><option value="cuttack">Cuttack District</option><option value="deogarh">Deogarh District</option><option value="dhenkanal">Dhenkanal District</option><option value="gajapati">Gajapati District</option><option value="ganjam">Ganjam District</option><option value="jagatsinghpur">Jagatsinghpur District</option><option value="jajpur">Jajpur District</option><option value="jharsuguda">Jharsuguda District</option><option value="kalahandi">Kalahandi District</option><option value="kandhamal">Kandhamal District</option><option value="kendrapara">Kendrapara District</option><option value="keonjhar">Keonjhar District</option><option value="khurda">Khurda District</option><option value="koraput">Koraput District</option><option value="malkangiri">Malkangiri District</option><option value="mayurbhanj">Mayurbhanj District</option><option value="nabarangapur">Nabarangapur District</option><option value="nayagarh">Nayagarh District</option><option value="nuapada">Nuapada District</option><option value="puri">Puri District</option><option value="rayagada">Rayagada District</option><option value="sambalpur">Sambalpur District</option><option value="subarnapur">Subarnapur District</option><option value="sundergarh">Sundergarh District</option><option value="__other">Other user…</option></select></label><label id="luoW" style="display:none">Username<input id="luo" autocapitalize="none" autocomplete="username"></label>
     <label>Password<input id="lp" type="password" autocomplete="current-password" required></label>
     <button class="btn p" id="lgBtn">Sign in</button>
   </form>
@@ -122,7 +122,7 @@ label.up{display:inline-flex;align-items:center;cursor:pointer;border:1px solid 
 
 <script>
 /* ═════ CONFIG: paste your Apps Script Web app URL (ends with /exec) ═════ */
-const API_URL='https://script.google.com/macros/s/AKfycbyzsE_0MpXqvDLzq8oaZ_mwGxGw9Q2R6pja5NH556ChQJSNcBn-kcazL0FxysDjzZDi/exec';
+const API_URL='PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -149,8 +149,9 @@ async function api(action,extra){
 const netErr=e=>e instanceof TypeError||!navigator.onLine;
 
 /* ═════ login / logout ═════ */
+(function(){const s=$('lu'),w=$('luoW'),tg=()=>{w.style.display=s.value==='__other'?'grid':'none'};try{const v=localStorage.getItem('smp_lu');if(v&&[...s.options].some(o=>o.value===v))s.value=v}catch(e){}tg();s.addEventListener('change',()=>{tg();try{localStorage.setItem('smp_lu',s.value)}catch(e){}})})();
 $('lgForm').onsubmit=async e=>{e.preventDefault();$('lgErr').textContent='';$('lgBtn').disabled=true;$('lgBtn').textContent='Signing in…';
-  try{const j=await api('login',{u:$('lu').value.trim(),p:$('lp').value});S={token:j.token,user:j.user};localStorage.setItem('smp_s',JSON.stringify(S));$('lp').value='';await enter()}
+  try{const j=await api('login',{u:($('lu').value==='__other'?$('luo').value:$('lu').value).trim(),p:$('lp').value});S={token:j.token,user:j.user};localStorage.setItem('smp_s',JSON.stringify(S));$('lp').value='';await enter()}
   catch(x){$('lgErr').textContent=netErr(x)?'No connection. You need internet for the first sign-in.':x.message}
   $('lgBtn').disabled=false;$('lgBtn').textContent='Sign in'};
 function wipeUI(){['kpi','mx','mt','ut','cloudInfo','upInfo','prog','vw','who','dist','vt','lv','ds'].forEach(i=>{$(i).innerHTML=''});
