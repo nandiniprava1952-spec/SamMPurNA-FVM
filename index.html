@@ -39,7 +39,7 @@ select,input,.f button,.btn{background:var(--bg);color:var(--text);border:1px so
 .g{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:12px}
 h2{font-size:12px;margin:0 0 8px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
 .ch{position:relative;height:240px}.w{overflow:auto;max-height:70vh}
-table{border-collapse:collapse;width:100%}th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);white-space:nowrap}
+table{border-collapse:collapse;width:100%}#mt{width:auto;min-width:0}#mt th,#mt td{padding-right:22px}th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);white-space:nowrap}
 th{position:sticky;top:0;background:var(--panel);color:var(--muted);font-weight:600;z-index:1}.n{text-align:right}
 .d{cursor:pointer;background:rgba(167,139,250,.10)}.d:hover{background:rgba(167,139,250,.22)}.d td:first-child{font-weight:700}
 .car{display:inline-block;width:14px;color:var(--accent);transition:transform .15s}.d.open .car{transform:rotate(90deg)}
@@ -64,6 +64,13 @@ label.up{display:inline-flex;align-items:center;cursor:pointer;border:1px solid 
 .card label{display:grid;gap:4px;font-size:12px;color:var(--muted)}
 .err{color:var(--bad);margin-top:10px;min-height:16px}
 #pw{position:fixed;inset:0;background:rgba(15,4,40,.75);display:flex;align-items:center;justify-content:center;z-index:20;padding:20px}
+#rcT tr:not(.hd){cursor:pointer}#rcT tr:not(.hd):hover td{background:rgba(251,146,60,.08)}
+#rd{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;padding:0}#rd[hidden]{display:none}
+#rd .rdc{background:var(--panel);border:1px solid var(--accent);border-radius:16px 16px 0 0;width:100%;max-width:520px;max-height:88vh;overflow:auto;padding:16px 18px calc(18px + env(safe-area-inset-bottom,0px))}
+@media(min-width:700px){#rd{align-items:center}#rd .rdc{border-radius:16px}}
+#rd h2{margin:0 0 10px;font-size:16px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+#rd dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0 0 12px}#rd dt{color:var(--muted)}#rd dd{margin:0;font-weight:600;word-break:break-word}
+#rd h3{font-size:13px;margin:12px 0 6px;color:var(--accent)}#rd .rl div{padding:4px 0;border-bottom:1px solid var(--border);font-size:13px}
 #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--panel);box-shadow:0 4px 16px rgba(0,0,0,.45);border:1px solid var(--accent2);padding:10px 14px;border-radius:10px;z-index:30;max-width:90vw;display:flex;gap:10px;align-items:center}
 @media(max-width:640px){
 body{font-size:14px;padding-bottom:calc(66px + env(safe-area-inset-bottom,0px))}
@@ -110,7 +117,7 @@ th,td{padding:8px 8px;font-size:12.5px}
 #updB{display:flex;gap:6px}
 #out{display:inline-flex;align-items:center;justify-content:center;padding:5px 9px;color:var(--text)}#out:hover{color:var(--accent);border-color:var(--accent)}#out svg{display:block}
 #upW{color:#7dd3fc;background:var(--panel);border-color:#7dd3fc;font-weight:600}#upW:hover{background:#7dd3fc;color:#1e1b4b}
-#upW[hidden]{display:none}
+#upW[hidden],#upP[hidden]{display:none!important}
 </style></head><body>
 
 <!-- LOGIN / COVER -->
@@ -142,11 +149,11 @@ th,td{padding:8px 8px;font-size:12.5px}
 <header><h1>SamMPurna <span>Field Visit Monitoring</span> — Odisha NHM</h1>
   <span class="net" id="netW"><i></i><b id="netT">Online</b></span><span class="pill" id="pill"><i></i><span id="src">—</span></span><span id="who"></span>
   <button class="hb" id="inst" hidden>⬇ Install</button><button class="hb" id="syn">⟳ Sync</button><button class="hb" id="out" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
-  <div class="switcher" id="tabs"><button class="active" data-v="v1">Overview</button><button data-v="v2" id="tMx">District / Block Matrix</button><button data-v="v3">Monitors</button><button data-v="v4" id="tAdmin" hidden>Admin</button><button data-v="v5" id="tSum">Summary</button><button data-v="v6" id="tRec">Records</button></div></header>
+  <div class="switcher" id="tabs"><button class="active" data-v="v1">Overview</button><button data-v="v2" id="tMx">District / Block Matrix</button><button data-v="v3">Monitors</button><button data-v="v4" id="tAdmin" hidden>Admin</button><button data-v="v6" id="tRec">Records</button><button data-v="v5" id="tSum">Summary</button></div></header>
 <div class="f" id="fbar"><span id="vw" style="align-self:center;width:100%"></span><button type="button" id="ftog">⚙ Filters ▾</button>
 <label>Visit date from<input type="date" id="from"></label><label>Visit date to<input type="date" id="to"></label>
-<label id="distWrap">District<select id="dist"></select></label><label>Visit type<select id="vt"></select></label>
-<label>Level<select id="lv"></select></label><label>Designation<select id="ds"></select></label><button id="rs">Reset</button>
+<label id="distWrap">District<select id="dist"></select></label><label>Block<select id="bk"></select></label><label>Visit type<select id="vt"></select></label>
+<label>Level<select id="lv"></select></label><label>Designation<select id="ds"></select></label><label>Team<select id="tm"></select></label><button id="rs">Reset</button>
 <label class="up" id="upW" hidden>⬆ Upload CSV / XLSX<input type="file" id="up" accept=".csv,.xlsx,.xls" hidden></label><label>Export<select id="dset"><option value="visits">Filtered visits</option><option value="matrix">Block matrix</option><option value="monitors">Monitors</option></select></label><button id="dcsv">⬇ CSV</button><button id="dxl">⬇ XLSX</button></div>
 
 <div class="c" id="upP" hidden style="margin:10px 16px 0"><h2 style="margin-top:0">Upload visits</h2><span id="upInfo" class="mut"></span>
@@ -196,6 +203,7 @@ th,td{padding:8px 8px;font-size:12.5px}
 <div id="upd" hidden role="status" aria-live="polite"><div class="ring" id="updR"><svg width="44" height="44" viewBox="0 0 44 44"><circle class="bg" cx="22" cy="22" r="18"/><circle class="fg" id="updF" cx="22" cy="22" r="18"/></svg><b id="updP"></b></div>
   <div style="flex:1;min-width:0"><div id="updT" style="font-weight:600"></div><div class="mut" id="updS" style="font-size:11px"></div></div>
   <div id="updB"><button class="btn p" id="updGo">Update</button><button class="btn" id="updLater">Later</button></div></div>
+<div id="rd" hidden><div class="rdc" id="rdc"></div></div>
 <div id="toast" hidden><span id="toastT"></span><button class="hb" id="toastB" hidden>Reload</button></div>
 
 <script>
@@ -232,7 +240,7 @@ $('lgForm').onsubmit=async e=>{e.preventDefault();$('lgErr').textContent='';$('l
   try{const j=await api('login',{u:($('lu').value==='__other'?$('luo').value:$('lu').value).trim(),p:$('lp').value});S={token:j.token,user:j.user};localStorage.setItem('smp_s',JSON.stringify(S));$('lp').value='';await enter()}
   catch(x){$('lgErr').textContent=netErr(x)?(navigator.onLine?'Cannot reach the server. Check that the Apps Script deployment access is set to Anyone, and that API_URL is the /exec URL.':'No connection. You need internet for the first sign-in.'):x.message}
   $('lgBtn').disabled=false;$('lgBtn').textContent='Sign in'};
-function wipeUI(){['kpi','mx','mt','ut','cloudInfo','upInfo','prog','vw','who','dist','vt','lv','ds'].forEach(i=>{$(i).innerHTML=''});
+function wipeUI(){$('rd').hidden=true;['kpi','mx','mt','ut','cloudInfo','upInfo','prog','vw','who','dist','bk','vt','lv','ds','tm'].forEach(i=>{$(i).innerHTML=''});
   Object.keys(cs).forEach(k=>{try{cs[k].destroy()}catch(e){}delete cs[k]});const cv=$('map'),g=cv.getContext('2d');g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,cv.width,cv.height);
   cur=[];mxA=[];mtA=[];users=[];staged=null;$('upP').hidden=true;kf=null;rcPage=0;$('rcQ').value='';$('rcT').innerHTML='';$('smK').innerHTML='';open_.clear();$('from').value=$('to').value='';$('barI').style.width='0'}
 async function logout(){localStorage.removeItem('smp_s');S=null;L=EMPTY();R=[];ver='';meta={};wipeUI();try{await idb.clear()}catch(e){}
@@ -242,7 +250,7 @@ $('out').onclick=()=>logout();
 /* ═════ enter app / role-based UI ═════ */
 function applyRole(){const u=S.user,st=isState();
   $('who').innerHTML=esc(u.name||u.username)+' · <b>'+(st?'State':'District · '+esc(u.district))+'</b>';
-  $('tAdmin').hidden=!st;$('distWrap').hidden=!st;$('upW').hidden=!st;
+  $('tAdmin').hidden=!st;$('distWrap').hidden=!st;$('upW').hidden=!st;$('up').disabled=!st;if(!st){$('upP').hidden=true;staged=null}
   $('tMx').textContent=st?'District / Block Matrix':'Block Matrix';
   document.querySelectorAll('#tabs button').forEach((b,i)=>b.classList.toggle('active',i===0));
   document.querySelectorAll('.v').forEach(v=>v.classList.toggle('on',v.id==='v1'));$('fbar').hidden=false}
@@ -267,9 +275,10 @@ addEventListener('online',()=>{updateNet();sync(false)});addEventListener('offli
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&S)sync(false)});
 
 /* ═════ filters / charts / tables (same logic as the original dashboard) ═════ */
+function fillBlk(){const di=$('dist').value,prev=$('bk').value,set=new Set();R.forEach(r=>{if(di===''||r[1]==di)set.add(r[9])});const ids=[...set].sort((a,b)=>String(L.blk[a]).localeCompare(String(L.blk[b])));$('bk').innerHTML='<option value="">All blocks</option>'+ids.map(i=>`<option value="${i}">${esc(L.blk[i])}</option>`).join('');if(prev!==''&&set.has(+prev))$('bk').value=prev}
 const fill=(id,a,all)=>{$(id).innerHTML=`<option value="">${all}</option>`+a.map((v,i)=>`<option value="${i}">${esc(v)}</option>`).join('')};
 let dates=[],F0='',F1='';
-function setup(){fill('dist',L.dist,'All districts');fill('vt',L.vtype,'All types');fill('lv',L.level,'All levels');fill('ds',L.desig,'All designations');
+function setup(){fill('dist',L.dist,'All districts');fill('vt',L.vtype,'All types');fill('lv',L.level,'All levels');fill('ds',L.desig,'All designations');fill('tm',L.team,'All teams');fillBlk();
   dates=L.date.filter(x=>x!=='na');F0=dates[0]||'';F1=dates[dates.length-1]||'';$('from').value=F0;$('to').value=F1}
 const cnt=(rows,k,n)=>{const a=new Array(n).fill(0);rows.forEach(r=>a[r[k]]++);return a};
 const topN=(a,l,n)=>a.map((v,i)=>[l[i],v]).filter(x=>x[1]).sort((x,y)=>y[1]-x[1]).slice(0,n);
@@ -279,10 +288,10 @@ function mk(id,type,lab,dat,col,opt={}){const cl=type==='doughnut'?PAL:col;
   if(cs[id]){const c=cs[id];c.data.labels=lab;c.data.datasets[0].data=dat;c.update();return}
   cs[id]=new Chart($(id),{type,data:{labels:lab,datasets:[{data:dat,backgroundColor:cl,borderColor:type==='line'?col:'#2e1065',borderWidth:type==='line'?2:1,tension:.25,pointRadius:0}]},
   options:Object.assign({responsive:true,maintainAspectRatio:false,plugins:{legend:{display:type==='doughnut',position:'bottom',labels:{color:'#d9ccf8'}}},scales:type==='doughnut'?{}:{x:{ticks:{color:'#d9ccf8',maxTicksLimit:10},grid:{display:false}},y:{ticks:{color:'#d9ccf8'},grid:{color:'#4b2a8c'},beginAtZero:true}}},opt)})}
-let cur=[],mxA=[],mtA=[],open_=new Set();
+let cur=[],mxA=[],mtA=[],open_=new Set(),rcA=[];
 function render(){if(!S)return;
-  const f=$('from').value,t=$('to').value,di=$('dist').value,vt=$('vt').value,lv=$('lv').value,ds=$('ds').value,st=isState();
-  const rows=cur=R.filter(r=>{const d=L.date[r[0]];return(!f||d>=f)&&(!t||d<=t)&&(di===''||r[1]==di)&&(vt===''||r[2]==vt)&&(lv===''||r[3]==lv)&&(ds===''||r[4]==ds)});
+  const f=$('from').value,t=$('to').value,di=$('dist').value,vt=$('vt').value,lv=$('lv').value,ds=$('ds').value,bk=$('bk').value,tm=$('tm').value,st=isState();
+  const rows=cur=R.filter(r=>{const d=L.date[r[0]];return(!f||d>=f)&&(!t||d<=t)&&(di===''||r[1]==di)&&(vt===''||r[2]==vt)&&(lv===''||r[3]==lv)&&(ds===''||r[4]==ds)&&(bk===''||r[9]==bk)&&(tm===''||r[5]==tm)});
   const n=rows.length,mons=new Set(),dists=new Set(),days=new Set();let geo=0,team=0;
   rows.forEach(r=>{mons.add(r[6]);dists.add(r[1]);days.add(r[0]);if(r[7])geo++;if(L.team[r[5]]!=='individual')team++});
   $('vw').innerHTML=`Viewing: <b>${st?'State'+(di!==''?' · '+esc(L.dist[di]):''):'District · '+esc(S.user.district)}</b> · ${n.toLocaleString()} of ${R.length.toLocaleString()} visits`;
@@ -310,8 +319,9 @@ function render(){if(!S)return;
    Object.keys(d.b).sort((x,y)=>d.b[y].v-d.b[x].v).forEach(k=>{const B=d.b[k];h2+=`<tr class="b${st?(open_.has(di_)?' show':''):' flat'}" data-p="${di_}"><td>${esc(L.blk[k])}</td>${z(B.v)}${z(B.m.size)}${z(B.bl)}${z(B.dl)}${z(B.tm)}${z(Math.round(100*B.g/B.v))}</tr>`;mxA.push([dn,L.blk[k],B.v,B.m.size,B.bl,B.dl,B.tm,Math.round(100*B.g/B.v)])})});
   h2+=`<tr class="t"><td>Total</td><td class="n">${tot[0]}</td><td class="n">${mons.size}</td><td class="n">${tot[1]}</td><td class="n">${tot[2]}</td><td class="n">${tot[3]}</td><td class="n">${tot[0]?Math.round(100*tot[4]/tot[0]):0}</td></tr>`;$('mx').innerHTML=h2;
   $('mx').querySelectorAll('.d').forEach(e=>e.onclick=()=>{const k=e.dataset.d;open_.has(k)?open_.delete(k):open_.add(k);e.classList.toggle('open');$('mx').querySelectorAll(`[data-p="${k}"]`).forEach(b=>b.classList.toggle('show'))});
-  renderSummary(rows);renderRecords(rows);const mAll=topN(cnt(rows,6,L.name.length),L.name,1e6);mtA=[['Rank','Monitor','Visits']].concat(mAll.map((m,i)=>[i+1,m[0],m[1]]));
-  $('mt').innerHTML='<tr><th>#</th><th>Monitor</th><th class="n">Visits</th></tr>'+mAll.slice(0,200).map((m,i)=>`<tr><td>${i+1}</td><td>${esc(m[0])}</td><td class="n">${m[1]}</td></tr>`).join('')}
+  renderSummary(rows);renderRecords(rows);const mAll=topN(cnt(rows,6,L.name.length),L.name,1e6);const mLast={};rows.forEach(r=>{const d=L.date[r[0]]||'';if(d>(mLast[r[6]]||''))mLast[r[6]]=d});const ago=d=>{if(!d)return'—';const k=Math.floor((Date.now()-new Date(d+'T00:00:00').getTime())/864e5);return k<=0?'today':k===1?'1 day ago':k+' days ago'};
+  const mName=m=>L.name.indexOf(m[0]);mtA=[['Rank','Monitor','Visits','Last active','Last active (ago)']].concat(mAll.map((m,i)=>{const d=mLast[mName(m)]||'';return[i+1,m[0],m[1],d,ago(d)]}));
+  $('mt').innerHTML='<tr><th>#</th><th>Monitor</th><th>Visits</th><th>Last active</th><th></th></tr>'+mAll.slice(0,200).map((m,i)=>{const d=mLast[mName(m)]||'';return`<tr><td>${i+1}</td><td>${esc(m[0])}</td><td>${m[1].toLocaleString()}</td><td>${esc(d||'—')}</td><td class="mut">${ago(d)}</td></tr>`}).join('')}
 
 function renderSummary(rows){const n=rows.length,E=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
  if(!n){$('smP').textContent='';$('smK').innerHTML='';$('smH').innerHTML='<li>No visits match the current filters.</li>';$('smT').innerHTML='';$('smL').innerHTML='';return}
@@ -354,11 +364,24 @@ function renderRecords(rows){if(!$('v6').classList.contains('on'))return;
  let a=kf?rows.filter(kf.fn):rows;const q=$('rcQ').value.trim().toLowerCase();
  if(q)a=a.filter(r=>(L.name[r[6]]+' '+L.dist[r[1]]+' '+L.blk[r[9]]+' '+L.vtype[r[2]]+' '+L.desig[r[4]]+' '+L.level[r[3]]+' '+GEO.name(r)).toLowerCase().includes(q));
  a=a.slice().sort((x,y)=>L.date[x[0]]<L.date[y[0]]?1:L.date[x[0]]>L.date[y[0]]?-1:0);
- const pages=Math.max(1,Math.ceil(a.length/PS));rcPage=Math.min(rcPage,pages-1);
+ rcA=a;const pages=Math.max(1,Math.ceil(a.length/PS));rcPage=Math.min(rcPage,pages-1);
  $('rcChip').hidden=$('rcClr').hidden=!kf;if(kf)$('rcChip').textContent='Showing: '+kf.label;
  $('rcP').textContent=a.length.toLocaleString()+' record'+(a.length===1?'':'s')+' · newest first · follows the filters above';
  $('rcPg').textContent='Page '+(rcPage+1)+' of '+pages;$('rcPrev').disabled=rcPage<=0;$('rcNext').disabled=rcPage>=pages-1;
- $('rcT').innerHTML='<tr class="hd"><th>Date</th><th>District</th><th>Block</th><th>Visit type</th><th>Level</th><th>Designation</th><th>Team</th><th>Monitor</th><th>Location</th></tr>'+(a.length?a.slice(rcPage*PS,rcPage*PS+PS).map(r=>`<tr><td data-label="Date">${esc(L.date[r[0]])}</td><td data-label="District">${esc(L.dist[r[1]])}</td><td data-label="Block">${esc(L.blk[r[9]])}</td><td data-label="Visit type">${esc(L.vtype[r[2]])}</td><td data-label="Level">${esc(L.level[r[3]])}</td><td data-label="Designation">${esc(L.desig[r[4]])}</td><td data-label="Team">${esc(L.team[r[5]])}</td><td data-label="Monitor">${esc(L.name[r[6]])}</td><td data-label="Location">${r[7]?`<span data-geo="${GEO.key(r)}"><span class="${GEO.name(r)?'':'mut'}">${esc(GEO.name(r)||'Locating…')}</span><br><small class="mut">${(r[7]/100).toFixed(2)}, ${(r[8]/100).toFixed(2)}</small></span>`:'—'}</td></tr>`).join(''):'<tr><td colspan="9" class="mut">No records match.</td></tr>');GEO.want(a.slice(rcPage*PS,rcPage*PS+PS))}
+ $('rcT').innerHTML='<tr class="hd"><th>Date</th><th>District</th><th>Block</th><th>Visit type</th><th>Level</th><th>Designation</th><th>Team</th><th>Monitor</th><th>Location</th></tr>'+(a.length?a.slice(rcPage*PS,rcPage*PS+PS).map((r,i)=>`<tr data-ri="${rcPage*PS+i}"><td data-label="Date">${esc(L.date[r[0]])}</td><td data-label="District">${esc(L.dist[r[1]])}</td><td data-label="Block">${esc(L.blk[r[9]])}</td><td data-label="Visit type">${esc(L.vtype[r[2]])}</td><td data-label="Level">${esc(L.level[r[3]])}</td><td data-label="Designation">${esc(L.desig[r[4]])}</td><td data-label="Team">${esc(L.team[r[5]])}</td><td data-label="Monitor">${esc(L.name[r[6]])}</td><td data-label="Location">${r[7]?`<span data-geo="${GEO.key(r)}"><span class="${GEO.name(r)?'':'mut'}">${esc(GEO.name(r)||'Locating…')}</span><br><small class="mut">${(r[7]/100).toFixed(2)}, ${(r[8]/100).toFixed(2)}</small></span>`:'—'}</td></tr>`).join(''):'<tr><td colspan="9" class="mut">No records match.</td></tr>');GEO.want(a.slice(rcPage*PS,rcPage*PS+PS))}
+function showRec(r){const E=esc,nm=L.name[r[6]],pl=GEO.name(r),dt=L.date[r[0]],wd=dt&&dt!=='na'?new Date(dt+'T00:00:00').toLocaleDateString(undefined,{weekday:'long'}):'';
+ const mine=R.filter(x=>x[6]===r[6]).sort((x,y)=>L.date[x[0]]<L.date[y[0]]?1:-1),last5=mine.slice(0,6).filter(x=>x!==r).slice(0,5);
+ const ll=r[7]?`${(r[7]/100).toFixed(2)}, ${(r[8]/100).toFixed(2)}`:'';
+ $('rdc').innerHTML=`<h2><span>Visit details</span><button class="btn" id="rdX">✕ Close</button></h2><dl>
+ <dt>Date</dt><dd>${E(dt)}${wd?' · '+E(wd):''}</dd><dt>District</dt><dd>${E(L.dist[r[1]])}</dd><dt>Block</dt><dd>${E(L.blk[r[9]])}</dd>
+ <dt>Visit type</dt><dd>${E(L.vtype[r[2]])}</dd><dt>Level</dt><dd>${E(L.level[r[3]])}</dd><dt>Designation</dt><dd>${E(L.desig[r[4]])}</dd>
+ <dt>Team</dt><dd>${E(L.team[r[5]])}</dd><dt>Monitor</dt><dd>${E(nm)}</dd>
+ <dt>Location</dt><dd>${r[7]?E(pl||'Locating…')+'<br><small class="mut">'+ll+' (approx.)</small><br><a href="https://www.google.com/maps?q='+(r[7]/100)+','+(r[8]/100)+'" target="_blank" rel="noopener" style="color:var(--accent)">Open in Maps ↗</a>':'Not geo-tagged'}</dd></dl>
+ <h3>${E(nm)} — ${mine.length.toLocaleString()} visit${mine.length===1?'':'s'} in total${mine[0]?' · last '+E(L.date[mine[0][0]]):''}</h3>
+ <div class="rl">${last5.length?last5.map(x=>`<div>${E(L.date[x[0]])} · ${E(L.vtype[x[2]])} · ${E(L.blk[x[9]])}${x[7]?'':' · <span class="mut">no geo</span>'}</div>`).join(''):'<div class="mut">No other visits.</div>'}</div>`;
+ $('rd').hidden=false;$('rdX').onclick=()=>$('rd').hidden=true}
+$('rcT').addEventListener('click',e=>{const tr=e.target.closest('tr[data-ri]');if(!tr||e.target.closest('a'))return;const r=rcA[+tr.dataset.ri];if(r)showRec(r)});
+$('rd').addEventListener('click',e=>{if(e.target===$('rd'))$('rd').hidden=true});addEventListener('keydown',e=>{if(e.key==='Escape')$('rd').hidden=true});
 $('rcQ').oninput=()=>{rcPage=0;renderRecords(cur)};$('rcClr').onclick=()=>{kf=null;rcPage=0;renderRecords(cur)};
 $('rcPrev').onclick=()=>{rcPage--;renderRecords(cur)};$('rcNext').onclick=()=>{rcPage++;renderRecords(cur)};
 function kpiGo(k){const go=v=>document.querySelector('#tabs [data-v="'+v+'"]').click();
@@ -371,9 +394,9 @@ function kpiGo(k){const go=v=>document.querySelector('#tabs [data-v="'+v+'"]').c
 ['kpi','smK'].forEach(id=>$(id).addEventListener('click',e=>{const c=e.target.closest('.kc');if(c)kpiGo(c.dataset.k)}));
 document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.v').forEach(v=>v.classList.toggle('on',v.id===b.dataset.v));
   $('fbar').hidden=b.dataset.v==='v4';{const p=b.parentElement;p.scrollTo({left:b.offsetLeft-(p.clientWidth-b.offsetWidth)/2,behavior:'smooth'});window.scrollTo(0,0)}if(b.dataset.v==='v4')openAdmin();else render()});
-['from','to','dist','vt','lv','ds'].forEach(i=>$(i).onchange=render);
+['from','to','dist','bk','vt','lv','ds','tm'].forEach(i=>$(i).onchange=render);$('dist').onchange=()=>{fillBlk();render()};
 $('ftog').onclick=()=>{const o=$('fbar').classList.toggle('open');$('ftog').textContent='⚙ Filters '+(o?'▴':'▾')};
-$('rs').onclick=()=>{['dist','vt','lv','ds'].forEach(i=>$(i).value='');$('from').value=F0;$('to').value=F1;render()};
+$('rs').onclick=()=>{['dist','vt','lv','ds','tm'].forEach(i=>$(i).value='');fillBlk();$('from').value=F0;$('to').value=F1;render()};
 
 /* ═════ export (works on GitHub Pages / installed PWA) ═════ */
 const cell=v=>{v=v==null?'':String(v);return /[",\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
@@ -381,7 +404,7 @@ const toCSV=a=>'\ufeff'+a.map(r=>r.map(cell).join(',')).join('\r\n');
 const visitsA=()=>{const a=[['Date','District','Block','Visit type','Level','Designation','Team','Monitor','Place','Latitude','Longitude']];cur.forEach(r=>a.push([L.date[r[0]],L.dist[r[1]],L.blk[r[9]],L.vtype[r[2]],L.level[r[3]],L.desig[r[4]],L.team[r[5]],L.name[r[6]],GEO.name(r),r[7]?r[7]/100:'',r[8]?r[8]/100:'']));return a};
 const SETS={visits:['Visits',visitsA],matrix:['Matrix',()=>mxA],monitors:['Monitors',()=>mtA]};
 function saveBlob(name,blob){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500)}
-function dl(fmt){const k=$('dset').value,a=SETS[k][1](),tag=isState()?'state':S.user.district.toLowerCase().replace(/\W+/g,'_'),sl=s=>String(s).trim().replace(/[^\w]+/g,'_').replace(/^_+|_+$/g,''),sel=id=>{const e=$(id);return e&&e.value!==''?sl(e.selectedOptions[0].text):''},rng=($('from').value!==F0||$('to').value!==F1)?$('from').value+'_to_'+$('to').value:'',name=['field_visits',k,sel('dist')||tag,sel('vt'),sel('lv'),sel('ds'),rng,new Date().toISOString().slice(0,10)].filter(Boolean).join('_')+'.'+fmt;
+function dl(fmt){const k=$('dset').value,a=SETS[k][1](),tag=isState()?'state':S.user.district.toLowerCase().replace(/\W+/g,'_'),sl=s=>String(s).trim().replace(/[^\w]+/g,'_').replace(/^_+|_+$/g,''),sel=id=>{const e=$(id);return e&&e.value!==''?sl(e.selectedOptions[0].text):''},rng=($('from').value!==F0||$('to').value!==F1)?$('from').value+'_to_'+$('to').value:'',name=['field_visits',k,sel('dist')||tag,sel('bk'),sel('vt'),sel('lv'),sel('ds'),sel('tm'),rng,new Date().toISOString().slice(0,10)].filter(Boolean).join('_')+'.'+fmt;
   if(fmt==='csv')return saveBlob(name,new Blob([toCSV(a)],{type:'text/csv;charset=utf-8'}));
   if(typeof XLSX==='undefined')return alert('XLSX library not loaded (needs internet once).');
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(a),SETS[k][0]);saveBlob(name,new Blob([XLSX.write(wb,{type:'array',bookType:'xlsx'})],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}))}
@@ -397,7 +420,7 @@ function parseRecs(recs){const T=[];let skip=0;
    const s=k=>String(pick(r,AL[k])).trim(),la=parseFloat(pick(r,AL.lat)),lo=parseFloat(pick(r,AL.lon)),ok=la>=17.5&&la<=22.7&&lo>=81&&lo<=87.7;
    T.push([d,s('d2')||s('d1')||'Unknown',s('blk')||s('b1')||'Unspecified',s('vtype')||'na',s('level')||'na',s('desig').replace(/_/g,' ')||'other',s('team')||'na',(s('name')||'Unknown').toLowerCase().replace(/\b\w/g,c=>c.toUpperCase()),ok?Math.round(la*100):0,ok?Math.round(lo*100):0])}
   return{T,skip}}
-$('up').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;staged=null;$('upRep').disabled=$('upApp').disabled=true;$('upP').hidden=false;$('prog').textContent='';$('barI').style.width='0';$('upInfo').textContent='Reading '+f.name+' …';
+$('up').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f||!isState())return;staged=null;$('upRep').disabled=$('upApp').disabled=true;$('upP').hidden=false;$('prog').textContent='';$('barI').style.width='0';$('upInfo').textContent='Reading '+f.name+' …';
   const done=recs=>{setTimeout(()=>{const p=parseRecs(recs);if(!p.T.length){$('upInfo').textContent='No usable rows (need a visit date column in YYYY-MM-DD).';return}
     staged=p.T;$('upInfo').textContent=`${f.name}: ${p.T.length.toLocaleString()} valid rows · rows already in the cloud will be skipped`+(p.skip?` · ${p.skip.toLocaleString()} skipped (no valid date)`:'');$('upRep').disabled=$('upApp').disabled=false},30)};
   if(/\.csv$/i.test(f.name)){const recs=[];Papa.parse(f,{header:true,skipEmptyLines:true,chunk:r=>r.data.forEach(x=>recs.push(prune(x))),complete:()=>done(recs),error:err=>{$('upInfo').textContent='Could not read CSV: '+err}})}
@@ -413,8 +436,13 @@ $('upRep').onclick=()=>push('replace');$('upX').onclick=()=>{$('upP').hidden=tru
 function cloudInfo(){if(!isState())return;$('cloudInfo').textContent=meta.total!=null?`Cloud sheet holds ${Number(meta.total).toLocaleString()} visits · last updated ${meta.at?new Date(meta.at).toLocaleString():'—'}`:''}
 let users=[];
 async function openAdmin(){cloudInfo();$('dl').innerHTML=L.dist.map(d=>`<option value="${esc(d)}">`).join('');await loadUsers()}
-async function loadUsers(){try{users=(await api('users')).users;$('ut').innerHTML='<tr><th>User</th><th>Name</th><th>Role</th><th>District</th><th>Active</th><th>Last login</th><th></th></tr>'+users.map((u,i)=>`<tr><td>${esc(u.username)}</td><td>${esc(u.name)}</td><td>${esc(u.role)}</td><td>${esc(u.district)}</td><td>${u.active?'✔':'✖'}</td><td>${u.lastLogin?new Date(u.lastLogin).toLocaleDateString():'—'}</td><td><button class="btn" data-i="${i}">Edit</button></td></tr>`).join('');
-  $('ut').querySelectorAll('button').forEach(b=>b.onclick=()=>editUser(users[b.dataset.i]))}catch(e){$('ut').innerHTML='<tr><td>'+esc(e.message)+'</td></tr>'}}
+async function loadUsers(){try{users=(await api('users')).users;
+  const BM={};R.forEach(r=>{const d=String(L.dist[r[1]]).trim().toLowerCase(),b=L.blk[r[9]],dt=L.date[r[0]]||'',o=(BM[d]=BM[d]||{})[b]=(BM[d]||{})[b]||{n:0,l:''};o.n++;if(dt>o.l)o.l=dt});
+  $('ut').innerHTML='<tr><th>User</th><th>Name</th><th>Role</th><th>District</th><th>Active</th><th>Last login</th><th></th></tr>'+users.map((u,i)=>{const bm=u.role==='district'?BM[String(u.district).trim().toLowerCase()]:null,bk=bm?Object.keys(bm).sort():[];
+   return `<tr><td>${esc(u.username)}</td><td>${esc(u.name)}</td><td>${esc(u.role)}</td><td>${esc(u.district)}</td><td>${u.active?'✔':'✖'}</td><td>${u.lastLogin?new Date(u.lastLogin).toLocaleDateString():'—'}</td><td><button class="btn" data-i="${i}">Edit</button>${u.role==='district'?` <button class="btn" data-t="${i}">Blocks ▸</button>`:''}</td></tr>`+
+   (u.role==='district'?`<tr id="bk${i}" hidden><td colspan="7"><div class="mut" style="margin-bottom:4px">Blocks sign in through this district account (${u.lastLogin?'last login '+new Date(u.lastLogin).toLocaleDateString():'never signed in'}). Block activity from visit data:</div>${bk.length?bk.map(b=>`<div>${esc(b)} — ${bm[b].n.toLocaleString()} visits · last ${esc(bm[b].l||'—')}</div>`).join(''):'<div class="mut">No visit data for this district yet.</div>'}</td></tr>`:'');}).join('');
+  $('ut').querySelectorAll('button[data-i]').forEach(b=>b.onclick=()=>editUser(users[b.dataset.i]));
+  $('ut').querySelectorAll('button[data-t]').forEach(b=>b.onclick=()=>{const r=$('bk'+b.dataset.t);r.hidden=!r.hidden;b.textContent=r.hidden?'Blocks ▸':'Blocks ▾'})}catch(e){$('ut').innerHTML='<tr><td>'+esc(e.message)+'</td></tr>'}}
 function editUser(u){$('uForm').hidden=!u;if(u)setTimeout(()=>$('uForm').scrollIntoView({behavior:'smooth',block:'nearest'}),0);$('uFT').textContent=u?'Edit user — '+u.username:'Add user';$('uU').value=u?u.username:'';$('uU').readOnly=!!u;$('uN').value=u?u.name:'';$('uR').value=u?u.role:'district';$('uD').value=u?u.district:'';$('uP').value='';$('uA').checked=u?u.active:true;$('uPh').textContent=u?'(leave blank to keep)':'(min 8)';roleUI()}
 function roleUI(){$('uDW').hidden=$('uR').value!=='district'}$('uR').onchange=roleUI;$('uC').onclick=()=>editUser(null);editUser(null);
 $('uS').onclick=async()=>{try{await api('user_save',{username:$('uU').value.trim(),name:$('uN').value,role:$('uR').value,district:$('uD').value,password:$('uP').value,active:$('uA').checked});toast('User saved');editUser(null);loadUsers()}catch(e){toast(e.message)}};
