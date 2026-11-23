@@ -13,7 +13,7 @@
 :root{--bg:#2e1065;--panel:#3b1a7a;--accent:#fb923c;--accent2:#f97316;--text:#ffffff;--muted:#d9ccf8;--border:#5b3a9e;--bad:#f87171;--ok:#4ade80;color-scheme:dark}
 *{box-sizing:border-box}[hidden]{display:none!important}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;font-family:'IBM Plex Sans','Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);font-size:13px;padding-bottom:env(safe-area-inset-bottom,0px)}
+html{-webkit-text-size-adjust:100%}body{-webkit-tap-highlight-color:transparent;touch-action:manipulation;margin:0;font-family:'IBM Plex Sans','Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);font-size:13px;padding-bottom:env(safe-area-inset-bottom,0px)}
 .mut{color:var(--muted)}
 header{display:flex;align-items:center;gap:10px;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top,0px));background:var(--panel);border-bottom:1px solid var(--border);flex-wrap:wrap;position:sticky;top:0;z-index:5}
 header{background:var(--bg);color:var(--text);border-bottom:3px solid var(--accent)}header .pill,#who,#vw{color:var(--muted)}
@@ -26,7 +26,7 @@ header h1{font-size:15px;margin:0 auto 0 0;font-weight:600}header h1 span{color:
 .switcher button{background:var(--panel);color:var(--text);border:1px solid var(--border);padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;white-space:nowrap}
 .switcher button:hover{color:var(--text);border-color:var(--accent2)}
 .switcher button.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#1a0d02;border-color:transparent}
-.f{display:flex;flex-wrap:wrap;gap:10px;padding:12px 16px;align-items:end;border-bottom:1px solid var(--border)}
+.f #ftog{display:none}.f{display:flex;flex-wrap:wrap;gap:10px;padding:12px 16px;align-items:end;border-bottom:1px solid var(--border)}
 .f label,.fm label{display:flex;flex-direction:column;font-size:11px;color:var(--muted);gap:3px}
 select,input,.f button,.btn{background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:7px 9px;font:inherit;min-height:34px}
 .f button,.btn{cursor:pointer;color:var(--accent)}.btn:disabled{opacity:.4;cursor:default}
@@ -34,8 +34,9 @@ select,input,.f button,.btn{background:var(--bg);color:var(--text);border:1px so
 .v{display:none;padding:16px;gap:12px}.v.on{display:grid}
 .k{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
 .c{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:12px;min-width:0}
+.kc{cursor:pointer;transition:border-color .15s,transform .15s}.kc:hover{border-color:var(--accent);transform:translateY(-1px)}.kc:active{transform:none}.kc::after{content:'View records ›';display:block;margin-top:4px;font-size:11px;color:var(--accent);opacity:.8}
 .k .c b{display:block;font-size:26px;color:var(--accent)}.k .c span{color:var(--muted);font-size:12px}
-.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:12px}
 h2{font-size:12px;margin:0 0 8px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
 .ch{position:relative;height:240px}.w{overflow:auto;max-height:70vh}
 table{border-collapse:collapse;width:100%}th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);white-space:nowrap}
@@ -50,37 +51,96 @@ canvas#map{width:100%;height:340px;display:block}
 label.up{display:inline-flex;align-items:center;cursor:pointer;border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--accent);min-height:34px}
 .bar{height:6px;background:var(--border);border-radius:9px;overflow:hidden;margin-top:6px}.bar i{display:block;height:100%;width:0;background:var(--accent)}
 /* login + modal + toast */
-#lg{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+#lg{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;padding-top:calc(20px + env(safe-area-inset-top,0px));background:radial-gradient(circle at 50% 0,#4c1d95 0,var(--bg) 62%)}
+.cover{width:100%;max-width:380px;text-align:center;margin:0 auto 16px;display:grid;gap:10px;justify-items:center}
+.cover img{border-radius:20px;box-shadow:0 6px 24px rgba(0,0,0,.45);border:1px solid var(--border)}
+.cover h1{font-size:22px;margin:4px 0 0;line-height:1.25}.cover h1 span{color:var(--accent);display:block}
+.chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}.chips span{font-size:11px;border:1px solid var(--border);border-radius:99px;padding:3px 10px;color:var(--muted);background:rgba(59,26,122,.6)}
+.ibadge{display:inline-flex;align-items:center;gap:12px;text-align:left;cursor:pointer;font:inherit;color:var(--text);background:var(--panel);border:1px solid var(--accent);border-radius:12px;padding:8px 16px;min-height:46px}
+.ibadge:hover{background:#4a2398}.ibadge .ico{font-size:20px;color:var(--accent)}.ibadge small{display:block;font-size:10px;letter-spacing:.08em;color:var(--accent)}.ibadge b{font-size:13px;font-weight:600}
+.ihelp{font-size:12px;max-width:320px;line-height:1.5}
 .card{width:100%;max-width:380px;background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:24px}
 .card h1{font-size:18px;margin:0 0 4px}.card h1 span{color:var(--accent)}.card form{display:grid;gap:12px;margin-top:16px}
 .card label{display:grid;gap:4px;font-size:12px;color:var(--muted)}
 .err{color:var(--bad);margin-top:10px;min-height:16px}
 #pw{position:fixed;inset:0;background:rgba(15,4,40,.75);display:flex;align-items:center;justify-content:center;z-index:20;padding:20px}
 #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--panel);box-shadow:0 4px 16px rgba(0,0,0,.45);border:1px solid var(--accent2);padding:10px 14px;border-radius:10px;z-index:30;max-width:90vw;display:flex;gap:10px;align-items:center}
-@media(max-width:640px){header h1{flex:1 1 100%;font-size:13px}.switcher button{flex:1;padding:8px 6px;min-height:40px}.v{padding:12px 10px}th,td{padding:7px 6px}}
+@media(max-width:640px){
+body{font-size:14px;padding-bottom:calc(66px + env(safe-area-inset-bottom,0px))}
+select,input,.f button,.btn{font-size:16px;min-height:44px}               /* 16px stops iOS zooming into inputs */
+header{position:static;padding:8px 12px;padding-top:calc(8px + env(safe-area-inset-top,0px));gap:8px}
+header h1{flex:1 1 100%;font-size:14px;margin:0}.hb{min-height:38px;padding:6px 12px}
+/* tabs become a bottom navigation bar */
+.switcher{position:fixed;left:0;right:0;bottom:0;z-index:15;width:auto;background:var(--bg);border-top:2px solid var(--accent);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));gap:6px;scrollbar-width:none;scroll-snap-type:x proximity}
+.switcher::-webkit-scrollbar{display:none}
+.switcher button{flex:0 0 auto;min-width:88px;min-height:44px;padding:6px 12px;font-size:12px;scroll-snap-align:center}
+/* filters collapse behind one button */
+.f{padding:10px 12px;gap:8px;position:sticky;top:0;z-index:4;background:var(--bg)}
+#vw{width:auto!important;flex:1;font-size:12px}
+.f #ftog{display:inline-flex;align-items:center;color:var(--accent)}
+.f:not(.open)>:not(#vw):not(#ftog){display:none}
+.f.open>label{flex:1 1 calc(50% - 8px)}.f.open>label input,.f.open>label select{width:100%}.f.open>button{flex:1 1 calc(33% - 8px)}
+.v{padding:12px 10px;gap:10px}
+.k{grid-template-columns:repeat(2,1fr);gap:8px}.k .c b{font-size:22px}
+.ch{height:210px}canvas#map{height:280px}
+th,td{padding:8px 8px;font-size:12.5px}
+.w{max-height:none}.w[style*="max-height"]{max-height:260px}
+.fm label{flex:1 1 140px}.fm input,.fm select{width:100%}.row .btn,label.up{flex:1 1 100%;justify-content:center}
+#toast{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+#upd{top:calc(8px + env(safe-area-inset-top,0px))}
+.card{padding:18px}
+/* Records: each row becomes a card */
+#rcT,#rcT tbody{display:block}
+#rcT tr{display:block;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:8px 12px;margin:0 0 10px}
+#rcT tr.hd{display:none}
+#rcT td{display:flex;justify-content:space-between;gap:12px;border:0;padding:3px 0;white-space:normal;text-align:right;font-size:13px}
+#rcT td::before{content:attr(data-label);color:var(--muted);text-align:left;flex:none}
+#rcT td:first-child{font-weight:700;color:var(--accent);padding-bottom:5px;margin-bottom:3px;border-bottom:1px solid var(--border)}
+.rcW{background:none!important;border:0!important;overflow:visible!important}
+#rcPrev,#rcNext{flex:1;max-width:140px}
+}
+@media(max-width:380px){.k .c b{font-size:20px}.switcher button{min-width:80px}}
+/* update card */
+#upd{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:40;width:min(440px,calc(100vw - 20px));background:var(--panel);border:1px solid var(--accent2);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:12px;box-shadow:0 6px 24px rgba(0,0,0,.5)}
+#upd .ring{width:44px;height:44px;flex:none;position:relative}#upd .ring svg{display:block;transform:rotate(-90deg)}
+#upd .ring circle{fill:none;stroke-width:4}#upd .bg{stroke:var(--border)}#upd .fg{stroke:var(--accent);stroke-linecap:round;stroke-dasharray:113.1;stroke-dashoffset:113.1;transition:stroke-dashoffset .3s}
+#upd .ring b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text)}
+#upd .ring.spin svg{animation:upsp 1s linear infinite}@keyframes upsp{to{transform:rotate(270deg)}}
+#upd.done{border-color:var(--ok)}#upd.done .fg{stroke:var(--ok)}
+#updB{display:flex;gap:6px}
 </style></head><body>
 
-<!-- LOGIN -->
-<div id="lg" hidden><div class="card">
-  <h1>SamMPurna <span>Field Visit Monitoring</span></h1>
-  <div class="mut">Odisha NHM · sign in with your State or District account</div>
+<!-- LOGIN / COVER -->
+<div id="lg" hidden>
+  <div class="cover">
+    <img src="icons/icon-192.png" alt="" width="76" height="76">
+    <h1>SamMPurna <span>Field Visit Monitoring</span></h1>
+    <div class="mut">Odisha National Health Mission</div>
+    <div class="chips"><span>📊 Live dashboards</span><span>📍 Geo-tagged visits</span><span>📴 Works offline</span></div>
+    <span class="net" id="netL"><i></i><b id="netLT">Online</b></span>
+    <div><button type="button" class="ibadge" id="inst2"><span class="ico">⬇</span><span><small>INSTALL APP</small><b>Add to your home screen</b></span></button></div>
+    <div class="mut ihelp" id="instHelp" hidden></div>
+  </div>
+  <div class="card">
+  <h1>Sign in</h1>
+  <div class="mut">Use your State or District account</div>
   <form id="lgForm">
     <label>State / District<select id="lu"><option value="state">State (Admin)</option><option value="anugul">Anugul District</option><option value="balasore">Balasore District</option><option value="baragarh">Baragarh District</option><option value="bhadrak">Bhadrak District</option><option value="bolangir">Bolangir District</option><option value="boudh">Boudh District</option><option value="cuttack">Cuttack District</option><option value="deogarh">Deogarh District</option><option value="dhenkanal">Dhenkanal District</option><option value="gajapati">Gajapati District</option><option value="ganjam">Ganjam District</option><option value="jagatsinghpur">Jagatsinghpur District</option><option value="jajpur">Jajpur District</option><option value="jharsuguda">Jharsuguda District</option><option value="kalahandi">Kalahandi District</option><option value="kandhamal">Kandhamal District</option><option value="kendrapara">Kendrapara District</option><option value="keonjhar">Keonjhar District</option><option value="khurda">Khurda District</option><option value="koraput">Koraput District</option><option value="malkangiri">Malkangiri District</option><option value="mayurbhanj">Mayurbhanj District</option><option value="nabarangapur">Nabarangapur District</option><option value="nayagarh">Nayagarh District</option><option value="nuapada">Nuapada District</option><option value="puri">Puri District</option><option value="rayagada">Rayagada District</option><option value="sambalpur">Sambalpur District</option><option value="subarnapur">Subarnapur District</option><option value="sundergarh">Sundergarh District</option><option value="__other">Other user…</option></select></label><label id="luoW" style="display:none">Username<input id="luo" autocapitalize="none" autocomplete="username"></label>
     <label>Password<input id="lp" type="password" autocomplete="current-password" required></label>
     <button class="btn p" id="lgBtn">Sign in</button>
   </form>
   <div class="err" id="lgErr"></div>
-  <div class="mut" id="iosHint" hidden>To install on iPhone/iPad: tap Share → <b>Add to Home Screen</b>.</div>
-  <button class="hb" id="inst2" hidden style="margin-top:10px">⬇ Install app</button>
-</div></div>
+  <div class="mut" id="offHint" hidden style="font-size:12px">You are offline. The first sign-in needs internet; after that the app works offline with saved data.</div>
+  </div>
+</div>
 
 <!-- APP -->
 <div id="app" hidden>
 <header><h1>SamMPurna <span>Field Visit Monitoring</span> — Odisha NHM</h1>
   <span class="net" id="netW"><i></i><b id="netT">Online</b></span><span class="pill" id="pill"><i></i><span id="src">—</span></span><span id="who"></span>
   <button class="hb" id="inst" hidden>⬇ Install</button><button class="hb" id="syn">⟳ Sync</button><button class="hb" id="chpw">Password</button><button class="hb" id="out">Sign out</button>
-  <div class="switcher" id="tabs"><button class="active" data-v="v1">Overview</button><button data-v="v2" id="tMx">District / Block Matrix</button><button data-v="v3">Monitors</button><button data-v="v4" id="tAdmin" hidden>Admin</button><button data-v="v5" id="tSum">Summary</button></div></header>
-<div class="f" id="fbar"><span id="vw" style="align-self:center;width:100%"></span>
+  <div class="switcher" id="tabs"><button class="active" data-v="v1">Overview</button><button data-v="v2" id="tMx">District / Block Matrix</button><button data-v="v3">Monitors</button><button data-v="v4" id="tAdmin" hidden>Admin</button><button data-v="v5" id="tSum">Summary</button><button data-v="v6" id="tRec">Records</button></div></header>
+<div class="f" id="fbar"><span id="vw" style="align-self:center;width:100%"></span><button type="button" id="ftog">⚙ Filters ▾</button>
 <label>Visit date from<input type="date" id="from"></label><label>Visit date to<input type="date" id="to"></label>
 <label id="distWrap">District<select id="dist"></select></label><label>Visit type<select id="vt"></select></label>
 <label>Level<select id="lv"></select></label><label>Designation<select id="ds"></select></label><button id="rs">Reset</button>
@@ -99,21 +159,25 @@ label.up{display:inline-flex;align-items:center;cursor:pointer;border:1px solid 
 <div class="g"><div class="c"><h2>Highlights</h2><ul id="smH" style="margin:0;padding-left:18px;line-height:1.8"></ul></div>
 <div class="c"><h2 id="smTH">Top 5 districts by visits</h2><div class="w"><table id="smT"></table></div></div>
 <div class="c"><h2 id="smLH">Needs attention: longest since last visit</h2><div class="w"><table id="smL"></table></div></div></div></div>
+<div class="v" id="v6"><div><h2 style="font-size:16px;color:var(--text);text-transform:none;margin:0 0 4px">Records</h2><p class="mut" id="rcP" style="margin:0 0 10px"></p></div>
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input id="rcQ" placeholder="Search monitor, district, block, type…" style="flex:1;min-width:200px"><span class="pill" id="rcChip" hidden></span><button class="btn" id="rcClr" hidden>Clear card filter</button></div>
+<div class="c w rcW" style="padding:0"><table id="rcT"></table></div>
+<div style="display:flex;gap:10px;align-items:center;justify-content:center"><button class="btn" id="rcPrev">‹ Prev</button><span class="mut" id="rcPg"></span><button class="btn" id="rcNext">Next ›</button></div></div>
 <div class="v" id="v4">
   <div class="c"><h2>Cloud data</h2><div id="cloudInfo" class="mut"></div>
     <div class="row"><label class="up">⬆ Choose CSV / XLSX<input type="file" id="up" accept=".csv,.xlsx,.xls" hidden></label><span id="upInfo" class="mut"></span></div>
     <div class="row"><button class="btn p" id="upRep" disabled>Replace all cloud data</button><button class="btn" id="upApp" disabled>Append new rows only</button><button class="btn" id="fsync">Force full re-download</button></div>
     <div class="bar"><i id="barI"></i></div><div class="mut" id="prog" style="margin-top:4px"></div></div>
   <div class="c"><h2>Users</h2><div class="w" style="max-height:260px"><table id="ut"></table></div>
-    <h2 id="uFT" style="margin-top:14px">Add user</h2>
+    <div id="uForm" hidden><h2 id="uFT" style="margin-top:14px">Edit user</h2>
     <div class="fm">
       <label>Username<input id="uU" autocapitalize="none"></label><label>Full name<input id="uN"></label>
       <label>Role<select id="uR"><option value="district">District</option><option value="state">State</option></select></label>
       <label id="uDW">District<input id="uD" list="dl"></label><datalist id="dl"></datalist>
       <label>Password <span id="uPh">(min 8)</span><input id="uP" type="text" autocomplete="off"></label>
       <label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="uA" checked style="min-height:auto">Active</label>
-      <button class="btn p" id="uS">Save user</button><button class="btn" id="uC">Clear</button></div>
-    <div class="mut" style="margin-top:8px">New or reset passwords are temporary: the user is forced to choose their own at first sign-in. District spelling must match the data (pick from the list).</div></div>
+      <button class="btn p" id="uS">Save user</button><button class="btn" id="uC">Close</button></div>
+    <div class="mut" style="margin-top:8px">New or reset passwords are temporary: the user is forced to choose their own at first sign-in. District spelling must match the data (pick from the list).</div></div></div>
 </div>
 </div>
 
@@ -123,6 +187,9 @@ label.up{display:inline-flex;align-items:center;cursor:pointer;border:1px solid 
   <label>New password (min 8)<input id="pn" type="password" autocomplete="new-password" required minlength="8"></label>
   <label>Repeat new password<input id="pr" type="password" autocomplete="new-password" required minlength="8"></label>
   <div class="row"><button class="btn p">Save</button><button type="button" class="btn" id="pc">Cancel</button></div></form><div class="err" id="pwE"></div></div></div>
+<div id="upd" hidden role="status" aria-live="polite"><div class="ring" id="updR"><svg width="44" height="44" viewBox="0 0 44 44"><circle class="bg" cx="22" cy="22" r="18"/><circle class="fg" id="updF" cx="22" cy="22" r="18"/></svg><b id="updP"></b></div>
+  <div style="flex:1;min-width:0"><div id="updT" style="font-weight:600"></div><div class="mut" id="updS" style="font-size:11px"></div></div>
+  <div id="updB"><button class="btn p" id="updGo">Update</button><button class="btn" id="updLater">Later</button></div></div>
 <div id="toast" hidden><span id="toastT"></span><button class="hb" id="toastB" hidden>Reload</button></div>
 
 <script>
@@ -161,7 +228,7 @@ $('lgForm').onsubmit=async e=>{e.preventDefault();$('lgErr').textContent='';$('l
   $('lgBtn').disabled=false;$('lgBtn').textContent='Sign in'};
 function wipeUI(){['kpi','mx','mt','ut','cloudInfo','upInfo','prog','vw','who','dist','vt','lv','ds'].forEach(i=>{$(i).innerHTML=''});
   Object.keys(cs).forEach(k=>{try{cs[k].destroy()}catch(e){}delete cs[k]});const cv=$('map'),g=cv.getContext('2d');g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,cv.width,cv.height);
-  cur=[];mxA=[];mtA=[];users=[];staged=null;open_.clear();$('from').value=$('to').value='';$('barI').style.width='0'}
+  cur=[];mxA=[];mtA=[];users=[];staged=null;kf=null;rcPage=0;$('rcQ').value='';$('rcT').innerHTML='';$('smK').innerHTML='';open_.clear();$('from').value=$('to').value='';$('barI').style.width='0'}
 async function logout(){localStorage.removeItem('smp_s');S=null;L=EMPTY();R=[];ver='';meta={};wipeUI();try{await idb.clear()}catch(e){}
   $('app').hidden=true;$('lg').hidden=false;$('pw').hidden=true}
 $('out').onclick=()=>logout();
@@ -181,7 +248,7 @@ function setSrc(t,off){$('src').textContent=t;$('pill').classList.toggle('off',!
 /* ═════ sync ═════ */
 let syncing=false,srvDown=false;
 const offTxt=()=>R.length?'Offline · showing saved data':'Offline · no saved data yet';
-function updateNet(){const on=navigator.onLine&&!srvDown;$('netW').classList.toggle('off',!on);$('netT').textContent=on?'Online':'Offline'}
+function updateNet(){const on=navigator.onLine&&!srvDown,t=on?'Online':'Offline';['netW','netL'].forEach(i=>$(i).classList.toggle('off',!on));$('netT').textContent=$('netLT').textContent=t;$('offHint').hidden=on}
 async function sync(force){if(syncing||!S)return;syncing=true;setSrc('Syncing…');
   try{const j=await api('data',{ver:force?'':ver});
     if(!j.unchanged){L=j.L;R=j.R;ver=j.ver;meta={at:j.at,total:j.total};await idb.set('data:'+S.user.username,{L,R,ver,meta,syncAt:Date.now()});setup();render()}
@@ -213,7 +280,7 @@ function render(){if(!S)return;
   const n=rows.length,mons=new Set(),dists=new Set(),days=new Set();let geo=0,team=0;
   rows.forEach(r=>{mons.add(r[6]);dists.add(r[1]);days.add(r[0]);if(r[7])geo++;if(L.team[r[5]]!=='individual')team++});
   $('vw').innerHTML=`Viewing: <b>${st?'State'+(di!==''?' · '+esc(L.dist[di]):''):'District · '+esc(S.user.district)}</b> · ${n.toLocaleString()} of ${R.length.toLocaleString()} visits`;
-  $('kpi').innerHTML=[[n.toLocaleString(),'Total visits'],[mons.size.toLocaleString(),'Unique monitors'],st?[dists.size,'Districts covered']:[new Set(rows.map(r=>r[9])).size,'Blocks covered'],[days.size,'Active days'],[days.size?Math.round(n/days.size):0,'Avg visits / day'],[n?Math.round(100*team/n)+'%':'-','Team visits'],[n?Math.round(100*geo/n)+'%':'-','Geo-tagged']].map(k=>`<div class="c"><b>${k[0]}</b><span>${k[1]}</span></div>`).join('');
+  $('kpi').innerHTML=[[n.toLocaleString(),'Total visits','all'],[mons.size.toLocaleString(),'Unique monitors','mon'],st?[dists.size,'Districts covered','dist']:[new Set(rows.map(r=>r[9])).size,'Blocks covered','dist'],[days.size,'Active days','all'],[days.size?Math.round(n/days.size):0,'Avg visits / day','all'],[n?Math.round(100*team/n)+'%':'-','Team visits','team'],[n?Math.round(100*geo/n)+'%':'-','Geo-tagged','geo']].map(k=>`<div class="c kc" data-k="${k[2]}"><b>${k[0]}</b><span>${k[1]}</span></div>`).join('');
   const by={};rows.forEach(r=>by[r[0]]=(by[r[0]]||0)+1);const ks=Object.keys(by).sort((a,b)=>L.date[a].localeCompare(L.date[b]));
   mk('c1','line',ks.map(i=>L.date[i]),ks.map(i=>by[i]),'#fb923c');
   let a=topN(cnt(rows,2,L.vtype.length),L.vtype,8);mk('c2','doughnut',a.map(x=>x[0]),a.map(x=>x[1]));
@@ -237,7 +304,7 @@ function render(){if(!S)return;
    Object.keys(d.b).sort((x,y)=>d.b[y].v-d.b[x].v).forEach(k=>{const B=d.b[k];h2+=`<tr class="b${st?(open_.has(di_)?' show':''):' flat'}" data-p="${di_}"><td>${esc(L.blk[k])}</td>${z(B.v)}${z(B.m.size)}${z(B.bl)}${z(B.dl)}${z(B.tm)}${z(Math.round(100*B.g/B.v))}</tr>`;mxA.push([dn,L.blk[k],B.v,B.m.size,B.bl,B.dl,B.tm,Math.round(100*B.g/B.v)])})});
   h2+=`<tr class="t"><td>Total</td><td class="n">${tot[0]}</td><td class="n">${mons.size}</td><td class="n">${tot[1]}</td><td class="n">${tot[2]}</td><td class="n">${tot[3]}</td><td class="n">${tot[0]?Math.round(100*tot[4]/tot[0]):0}</td></tr>`;$('mx').innerHTML=h2;
   $('mx').querySelectorAll('.d').forEach(e=>e.onclick=()=>{const k=e.dataset.d;open_.has(k)?open_.delete(k):open_.add(k);e.classList.toggle('open');$('mx').querySelectorAll(`[data-p="${k}"]`).forEach(b=>b.classList.toggle('show'))});
-  renderSummary(rows);const mAll=topN(cnt(rows,6,L.name.length),L.name,1e6);mtA=[['Rank','Monitor','Visits']].concat(mAll.map((m,i)=>[i+1,m[0],m[1]]));
+  renderSummary(rows);renderRecords(rows);const mAll=topN(cnt(rows,6,L.name.length),L.name,1e6);mtA=[['Rank','Monitor','Visits']].concat(mAll.map((m,i)=>[i+1,m[0],m[1]]));
   $('mt').innerHTML='<tr><th>#</th><th>Monitor</th><th class="n">Visits</th></tr>'+mAll.slice(0,200).map((m,i)=>`<tr><td>${i+1}</td><td>${esc(m[0])}</td><td class="n">${m[1]}</td></tr>`).join('')}
 
 function renderSummary(rows){const n=rows.length,E=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -248,7 +315,7 @@ function renderSummary(rows){const n=rows.length,E=s=>String(s).replace(/[&<>"]/
  rows.forEach(r=>{mons.add(r[6]);dists.add(r[1]);blks.add(r[9]);const d=L.date[r[0]];dc[d]=(dc[d]||0)+1;if(!dl[r[K]]||d>dl[r[K]])dl[r[K]]=d;if(L.team[r[5]]!=='individual')team++;if(r[7])geo++});
  const busy=Object.entries(dc).sort((a,b)=>b[1]-a[1])[0],days=Object.keys(dc).length,tv=topN(cnt(rows,2,L.vtype.length),L.vtype,1)[0],tl=topN(cnt(rows,3,L.level.length),L.level,1)[0],td=topN(cnt(rows,K,NM.length),NM,5);
  $('smTH').textContent='Top 5 '+U+'s by visits';$('smLH').textContent='Needs attention: '+U+'s with the longest gap since last visit';$('smP').textContent='Based on the current filters · data from '+first+' to '+last;
- $('smK').innerHTML=[[n.toLocaleString(),'Total visits'],[mons.size.toLocaleString(),'Monitors'],[dists.size,'Districts'],[blks.size,'Blocks covered'],[days,'Active days'],[c7.toLocaleString(),'Last 7 days']].map(k=>`<div class="c"><b>${k[0]}</b><span>${k[1]}</span></div>`).join('');
+ $('smK').innerHTML=[[n.toLocaleString(),'Total visits','all'],[mons.size.toLocaleString(),'Monitors','mon'],[dists.size,'Districts','dist'],[blks.size,'Blocks covered','dist'],[days,'Active days','all'],[c7.toLocaleString(),'Last 7 days','l7']].map(k=>`<div class="c kc" data-k="${k[2]}"><b>${k[0]}</b><span>${k[1]}</span></div>`).join('');
  const ch=p7?(c7>=p7?'up ':'down ')+Math.abs(Math.round(100*(c7-p7)/p7))+'% from the 7 days before ('+p7.toLocaleString()+')':'no visits in the 7 days before';
  $('smH').innerHTML=[`<b>${n.toLocaleString()}</b> visits by <b>${mons.size.toLocaleString()}</b> monitors across <b>${dists.size}</b> districts and <b>${blks.size}</b> blocks.`,
   `Last 7 days: <b>${c7.toLocaleString()}</b> visits, ${ch}.`,`Busiest day: <b>${busy[0]}</b> with ${busy[1].toLocaleString()} visits; average <b>${Math.round(n/days)}</b> per active day.`,
@@ -257,9 +324,31 @@ function renderSummary(rows){const n=rows.length,E=s=>String(s).replace(/[&<>"]/
  $('smT').innerHTML='<tr><th>'+UC+'</th><th class="n">Visits</th><th class="n">Share</th></tr>'+td.map(x=>`<tr><td>${E(x[0])}</td><td class="n">${x[1].toLocaleString()}</td><td class="n">${pc(x[1],n)}%</td></tr>`).join('');
  const old=Object.entries(dl).sort((a,b)=>a[1].localeCompare(b[1])).slice(0,5);
  $('smL').innerHTML='<tr><th>'+UC+'</th><th class="n">Last visit</th><th class="n">Days before latest</th></tr>'+old.map(x=>`<tr><td>${E(NM[x[0]])}</td><td class="n">${x[1]}</td><td class="n">${Math.round((new Date(last)-new Date(x[1]))/day)}</td></tr>`).join('')}
+
+let kf=null,rcPage=0;const PS=50;
+function renderRecords(rows){if(!$('v6').classList.contains('on'))return;
+ let a=kf?rows.filter(kf.fn):rows;const q=$('rcQ').value.trim().toLowerCase();
+ if(q)a=a.filter(r=>(L.name[r[6]]+' '+L.dist[r[1]]+' '+L.blk[r[9]]+' '+L.vtype[r[2]]+' '+L.desig[r[4]]+' '+L.level[r[3]]).toLowerCase().includes(q));
+ a=a.slice().sort((x,y)=>L.date[x[0]]<L.date[y[0]]?1:L.date[x[0]]>L.date[y[0]]?-1:0);
+ const pages=Math.max(1,Math.ceil(a.length/PS));rcPage=Math.min(rcPage,pages-1);
+ $('rcChip').hidden=$('rcClr').hidden=!kf;if(kf)$('rcChip').textContent='Showing: '+kf.label;
+ $('rcP').textContent=a.length.toLocaleString()+' record'+(a.length===1?'':'s')+' · newest first · follows the filters above';
+ $('rcPg').textContent='Page '+(rcPage+1)+' of '+pages;$('rcPrev').disabled=rcPage<=0;$('rcNext').disabled=rcPage>=pages-1;
+ $('rcT').innerHTML='<tr class="hd"><th>Date</th><th>District</th><th>Block</th><th>Visit type</th><th>Level</th><th>Designation</th><th>Team</th><th>Monitor</th><th>Location</th></tr>'+(a.length?a.slice(rcPage*PS,rcPage*PS+PS).map(r=>`<tr><td data-label="Date">${esc(L.date[r[0]])}</td><td data-label="District">${esc(L.dist[r[1]])}</td><td data-label="Block">${esc(L.blk[r[9]])}</td><td data-label="Visit type">${esc(L.vtype[r[2]])}</td><td data-label="Level">${esc(L.level[r[3]])}</td><td data-label="Designation">${esc(L.desig[r[4]])}</td><td data-label="Team">${esc(L.team[r[5]])}</td><td data-label="Monitor">${esc(L.name[r[6]])}</td><td data-label="Location">${r[7]?(r[7]/100).toFixed(2)+', '+(r[8]/100).toFixed(2):'—'}</td></tr>`).join(''):'<tr><td colspan="9" class="mut">No records match.</td></tr>')}
+$('rcQ').oninput=()=>{rcPage=0;renderRecords(cur)};$('rcClr').onclick=()=>{kf=null;rcPage=0;renderRecords(cur)};
+$('rcPrev').onclick=()=>{rcPage--;renderRecords(cur)};$('rcNext').onclick=()=>{rcPage++;renderRecords(cur)};
+function kpiGo(k){const go=v=>document.querySelector('#tabs [data-v="'+v+'"]').click();
+ rcPage=0;$('rcQ').value='';
+ if(k==='team')kf={label:'Team visits',fn:r=>L.team[r[5]]!=='individual'};
+ else if(k==='geo')kf={label:'Geo-tagged visits',fn:r=>!!r[7]};
+ else if(k==='l7'){let mx='';cur.forEach(r=>{const d=L.date[r[0]];if(d>mx)mx=d});const cut=new Date(new Date(mx+'T00:00:00Z')-7*864e5).toISOString().slice(0,10);kf={label:'last 7 days (after '+cut+')',fn:r=>L.date[r[0]]>cut}}
+ else kf=null;
+ go('v6')}
+['kpi','smK'].forEach(id=>$(id).addEventListener('click',e=>{const c=e.target.closest('.kc');if(c)kpiGo(c.dataset.k)}));
 document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.v').forEach(v=>v.classList.toggle('on',v.id===b.dataset.v));
-  $('fbar').hidden=b.dataset.v==='v4';if(b.dataset.v==='v4')openAdmin();else render()});
+  $('fbar').hidden=b.dataset.v==='v4';{const p=b.parentElement;p.scrollTo({left:b.offsetLeft-(p.clientWidth-b.offsetWidth)/2,behavior:'smooth'});window.scrollTo(0,0)}if(b.dataset.v==='v4')openAdmin();else render()});
 ['from','to','dist','vt','lv','ds'].forEach(i=>$(i).onchange=render);
+$('ftog').onclick=()=>{const o=$('fbar').classList.toggle('open');$('ftog').textContent='⚙ Filters '+(o?'▴':'▾')};
 $('rs').onclick=()=>{['dist','vt','lv','ds'].forEach(i=>$(i).value='');$('from').value=F0;$('to').value=F1;render()};
 
 /* ═════ export (works on GitHub Pages / installed PWA) ═════ */
@@ -302,7 +391,7 @@ let users=[];
 async function openAdmin(){cloudInfo();$('dl').innerHTML=L.dist.map(d=>`<option value="${esc(d)}">`).join('');await loadUsers()}
 async function loadUsers(){try{users=(await api('users')).users;$('ut').innerHTML='<tr><th>User</th><th>Name</th><th>Role</th><th>District</th><th>Active</th><th>Last login</th><th></th></tr>'+users.map((u,i)=>`<tr><td>${esc(u.username)}</td><td>${esc(u.name)}</td><td>${esc(u.role)}</td><td>${esc(u.district)}</td><td>${u.active?'✔':'✖'}</td><td>${u.lastLogin?new Date(u.lastLogin).toLocaleDateString():'—'}</td><td><button class="btn" data-i="${i}">Edit</button></td></tr>`).join('');
   $('ut').querySelectorAll('button').forEach(b=>b.onclick=()=>editUser(users[b.dataset.i]))}catch(e){$('ut').innerHTML='<tr><td>'+esc(e.message)+'</td></tr>'}}
-function editUser(u){$('uFT').textContent=u?'Edit user — '+u.username:'Add user';$('uU').value=u?u.username:'';$('uU').readOnly=!!u;$('uN').value=u?u.name:'';$('uR').value=u?u.role:'district';$('uD').value=u?u.district:'';$('uP').value='';$('uA').checked=u?u.active:true;$('uPh').textContent=u?'(leave blank to keep)':'(min 8)';roleUI()}
+function editUser(u){$('uForm').hidden=!u;if(u)setTimeout(()=>$('uForm').scrollIntoView({behavior:'smooth',block:'nearest'}),0);$('uFT').textContent=u?'Edit user — '+u.username:'Add user';$('uU').value=u?u.username:'';$('uU').readOnly=!!u;$('uN').value=u?u.name:'';$('uR').value=u?u.role:'district';$('uD').value=u?u.district:'';$('uP').value='';$('uA').checked=u?u.active:true;$('uPh').textContent=u?'(leave blank to keep)':'(min 8)';roleUI()}
 function roleUI(){$('uDW').hidden=$('uR').value!=='district'}$('uR').onchange=roleUI;$('uC').onclick=()=>editUser(null);editUser(null);
 $('uS').onclick=async()=>{try{await api('user_save',{username:$('uU').value.trim(),name:$('uN').value,role:$('uR').value,district:$('uD').value,password:$('uP').value,active:$('uA').checked});toast('User saved');editUser(null);loadUsers()}catch(e){toast(e.message)}};
 
@@ -314,17 +403,48 @@ $('pwForm').onsubmit=async e=>{e.preventDefault();if($('pn').value!==$('pr').val
   try{const j=await api('pw_change',{old:$('po').value,pw:$('pn').value});S={token:j.token,user:j.user};localStorage.setItem('smp_s',JSON.stringify(S));$('pw').hidden=true;toast('Password changed')}catch(x){$('pwE').textContent=x.message}};
 
 /* ═════ PWA: service worker, update prompt, install ═════ */
-const hadCtrl=!!(navigator.serviceWorker&&navigator.serviceWorker.controller);
-if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').then(reg=>{
-  reg.addEventListener('updatefound',()=>{const w=reg.installing;w&&w.addEventListener('statechange',()=>{if(w.state==='installed'&&navigator.serviceWorker.controller){toast('A new version is ready.',true);$('toastB').onclick=()=>w.postMessage('SKIP_WAITING')}})});
-  let rl=false;const had=hadCtrl;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had&&!rl){rl=true;location.reload()}})}).catch(()=>{}));
-let dip=null;addEventListener('beforeinstallprompt',e=>{e.preventDefault();dip=e;$('inst').hidden=$('inst2').hidden=false});
-const doInst=async()=>{if(!dip)return;dip.prompt();await dip.userChoice;dip=null;$('inst').hidden=$('inst2').hidden=true};$('inst').onclick=$('inst2').onclick=doInst;
-addEventListener('appinstalled',()=>{$('inst').hidden=$('inst2').hidden=true});
-if(/iphone|ipad|ipod/i.test(navigator.userAgent)&&!navigator.standalone)$('iosHint').hidden=false;
+const CIRC=113.1,U={reg:null,state:'',ht:0};
+function updUI(st,pct){U.state=st;clearTimeout(U.ht);const el=$('upd'),R=$('updR'),F=$('updF');
+  el.hidden=st==='';if(!st)return;el.classList.toggle('done',st==='done');R.classList.toggle('spin',st==='inst');$('updB').hidden=st!=='ready';
+  if(st==='down'){pct=Math.max(0,Math.min(100,Math.round(pct||0)));F.style.strokeDashoffset=CIRC*(1-pct/100);$('updP').textContent=pct+'%';$('updT').textContent='Downloading update…';$('updS').textContent='Please keep the app open.'}
+  else if(st==='ready'){F.style.strokeDashoffset=0;$('updP').textContent='100%';$('updT').textContent='Update available';$('updS').textContent='A new version is ready to install.'}
+  else if(st==='inst'){F.style.strokeDashoffset=CIRC*.3;$('updP').textContent='';$('updT').textContent='Installing update…';$('updS').textContent='The app will restart on its own.'}
+  else if(st==='done'){F.style.strokeDashoffset=0;$('updP').textContent='✔';$('updT').textContent='✔ Updated to the latest version';$('updS').textContent='';U.ht=setTimeout(()=>updUI(''),5000)}}
+const hasCtrl=()=>!!(navigator.serviceWorker&&navigator.serviceWorker.controller);
+function watchSW(w){if(!w||!hasCtrl())return;                       /* first install (no previous version) shows nothing */
+  if(w.state==='installed'){if(U.state!=='inst')updUI('ready');return}
+  if(U.state!=='inst')updUI('down',0);
+  w.addEventListener('statechange',()=>{if(w.state==='installed'&&U.state!=='inst')updUI('ready');else if(w.state==='redundant'&&U.state==='down')updUI('')})}
+function checkUpdate(){const r=U.reg;if(!r||U.state==='inst')return;
+  r.update().catch(()=>{}).then(()=>{if(!hasCtrl())return;if(r.waiting){if(U.state!=='inst'&&U.state!=='ready')updUI('ready')}else if(r.installing&&U.state==='')watchSW(r.installing)})}
+$('updGo').onclick=()=>{const w=U.reg&&U.reg.waiting;updUI('inst');try{localStorage.setItem('smp_upd','1')}catch(e){}
+  if(w)w.postMessage('SKIP_WAITING');setTimeout(()=>{if(U.state==='inst')location.reload()},10000)};   /* safety net if the worker never switches */
+$('updLater').onclick=()=>updUI('');                                  /* hidden until the next check re-shows it */
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.addEventListener('message',e=>{const d=e.data;if(d&&d.type==='UPDATE_PROGRESS'&&hasCtrl()&&U.state!=='inst'&&U.state!=='ready')updUI('down',d.pct)});
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{if(U.state==='inst')location.reload()});
+  addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').then(reg=>{U.reg=reg;
+    reg.addEventListener('updatefound',()=>watchSW(reg.installing));
+    if(reg.waiting&&hasCtrl())updUI('ready');else if(reg.installing)watchSW(reg.installing);
+    checkUpdate();setInterval(checkUpdate,30*60*1000);
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate()})}).catch(()=>{}));
+  try{if(localStorage.getItem('smp_upd')==='1'){localStorage.removeItem('smp_upd');updUI('done')}}catch(e){}}
+let dip=null;
+const isStandalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+function instUI(){const done=isStandalone();$('inst2').hidden=done;if(done)$('instHelp').hidden=true;$('inst').hidden=done||!dip}
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();dip=e;instUI()});
+const doInst=async()=>{
+  if(dip){dip.prompt();try{await dip.userChoice}catch(e){}dip=null;instUI();return}
+  const hp=$('instHelp');hp.innerHTML=isIOS?'To install: tap the <b>Share</b> button, then <b>Add to Home Screen</b>.':'To install: open the browser menu (⋮) and choose <b>Install app</b> or <b>Add to Home screen</b>.';hp.hidden=!hp.hidden};
+$('inst').onclick=$('inst2').onclick=doInst;
+addEventListener('appinstalled',()=>{dip=null;instUI();toast('App installed')});
+matchMedia('(display-mode: standalone)').addEventListener&&matchMedia('(display-mode: standalone)').addEventListener('change',instUI);
+instUI();
 addEventListener('resize',()=>{if(S&&!$('app').hidden&&$('v1').classList.contains('on'))render()});
 
 /* ═════ boot ═════ */
+try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}   /* ask the browser not to evict the saved session / offline data */
 (function(){let s=null;try{s=JSON.parse(localStorage.getItem('smp_s')||'null')}catch(e){}
   if(s&&s.token&&s.user){S=s;enter()}else $('lg').hidden=false})();
 </script></body></html>
