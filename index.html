@@ -1,0 +1,313 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SamMPurna Field Visit Monitoring</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1c130c">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="SamMPurna FVM">
+<link rel="apple-touch-icon" href="icons/icon-192.png"><link rel="icon" href="icons/icon-192.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<style>
+:root{--bg:#120c08;--panel:#1c130c;--accent:#fb923c;--accent2:#f97316;--text:#f5e9de;--muted:#c9a58c;--border:#2e2015;--bad:#ef4444;--ok:#22c55e;color-scheme:dark}
+*{box-sizing:border-box}[hidden]{display:none!important}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;font-family:'IBM Plex Sans','Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);font-size:13px;padding-bottom:env(safe-area-inset-bottom,0px)}
+.mut{color:var(--muted)}
+header{display:flex;align-items:center;gap:10px;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top,0px));background:var(--panel);border-bottom:1px solid var(--border);flex-wrap:wrap;position:sticky;top:0;z-index:5}
+header h1{font-size:15px;margin:0 auto 0 0;font-weight:600}header h1 span{color:var(--accent)}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);border:1px solid var(--border);border-radius:99px;padding:3px 9px}.pill i{width:7px;height:7px;border-radius:50%;background:var(--ok)}.pill.off i{background:#f59e0b}
+#who,#vw{font-size:12px;color:var(--muted)}#who b,#vw b{color:var(--accent)}
+.hb{background:none;color:var(--accent);border:1px solid var(--border);border-radius:8px;padding:5px 10px;cursor:pointer;font:inherit;min-height:32px}
+.switcher{display:flex;gap:8px;width:100%;overflow-x:auto}
+.switcher button{background:#1a1410;color:var(--muted);border:1px solid var(--border);padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;white-space:nowrap}
+.switcher button:hover{color:var(--text);border-color:var(--accent2)}
+.switcher button.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#1a0d02;border-color:transparent}
+.f{display:flex;flex-wrap:wrap;gap:10px;padding:12px 16px;align-items:end;border-bottom:1px solid var(--border)}
+.f label,.fm label{display:flex;flex-direction:column;font-size:11px;color:var(--muted);gap:3px}
+select,input,.f button,.btn{background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:7px 9px;font:inherit;min-height:34px}
+.f button,.btn{cursor:pointer;color:var(--accent)}.btn:disabled{opacity:.4;cursor:default}
+.btn.p{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#1a0d02;border-color:transparent;font-weight:700}
+.v{display:none;padding:16px;gap:12px}.v.on{display:grid}
+.k{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.c{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:12px;min-width:0}
+.k .c b{display:block;font-size:26px;color:var(--accent)}.k .c span{color:var(--muted);font-size:12px}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+h2{font-size:12px;margin:0 0 8px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.ch{position:relative;height:240px}.w{overflow:auto;max-height:70vh}
+table{border-collapse:collapse;width:100%}th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);white-space:nowrap}
+th{position:sticky;top:0;background:var(--panel);color:var(--muted);font-weight:600;z-index:1}.n{text-align:right}
+.d{cursor:pointer;background:rgba(251,146,60,.05)}.d:hover{background:rgba(251,146,60,.12)}.d td:first-child{font-weight:700}
+.car{display:inline-block;width:14px;color:var(--accent);transition:transform .15s}.d.open .car{transform:rotate(90deg)}
+.b{display:none}.b.show{display:table-row}.b td:first-child{padding-left:30px;color:var(--muted)}.b.flat{display:table-row}.b.flat td:first-child{padding-left:10px;color:var(--text)}.z{opacity:.5}
+.t td{font-weight:700;background:var(--panel);border-top:2px solid var(--border);position:sticky;bottom:0}
+canvas#map{width:100%;height:340px;display:block}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin:8px 0}
+.fm{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+label.up{display:inline-flex;align-items:center;cursor:pointer;border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--accent);min-height:34px}
+.bar{height:6px;background:var(--border);border-radius:9px;overflow:hidden;margin-top:6px}.bar i{display:block;height:100%;width:0;background:var(--accent)}
+/* login + modal + toast */
+#lg{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{width:100%;max-width:380px;background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:24px}
+.card h1{font-size:18px;margin:0 0 4px}.card h1 span{color:var(--accent)}.card form{display:grid;gap:12px;margin-top:16px}
+.card label{display:grid;gap:4px;font-size:12px;color:var(--muted)}
+.err{color:var(--bad);margin-top:10px;min-height:16px}
+#pw{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:20;padding:20px}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:#2a1b10;border:1px solid var(--accent2);padding:10px 14px;border-radius:10px;z-index:30;max-width:90vw;display:flex;gap:10px;align-items:center}
+@media(max-width:640px){header h1{flex:1 1 100%;font-size:13px}.switcher button{flex:1;padding:8px 6px;min-height:40px}.v{padding:12px 10px}th,td{padding:7px 6px}}
+</style></head><body>
+
+<!-- LOGIN -->
+<div id="lg" hidden><div class="card">
+  <h1>SamMPurna <span>Field Visit Monitoring</span></h1>
+  <div class="mut">Odisha NHM · sign in with your State or District account</div>
+  <form id="lgForm">
+    <label>Username<input id="lu" autocomplete="username" autocapitalize="none" required></label>
+    <label>Password<input id="lp" type="password" autocomplete="current-password" required></label>
+    <button class="btn p" id="lgBtn">Sign in</button>
+  </form>
+  <div class="err" id="lgErr"></div>
+  <div class="mut" id="iosHint" hidden>To install on iPhone/iPad: tap Share → <b>Add to Home Screen</b>.</div>
+  <button class="hb" id="inst2" hidden style="margin-top:10px">⬇ Install app</button>
+</div></div>
+
+<!-- APP -->
+<div id="app" hidden>
+<header><h1>SamMPurna <span>Field Visit Monitoring</span> — Odisha NHM</h1>
+  <span class="pill" id="pill"><i></i><span id="src">—</span></span><span id="who"></span>
+  <button class="hb" id="inst" hidden>⬇ Install</button><button class="hb" id="syn">⟳ Sync</button><button class="hb" id="chpw">Password</button><button class="hb" id="out">Sign out</button>
+  <div class="switcher" id="tabs"><button class="active" data-v="v1">Overview</button><button data-v="v2" id="tMx">District / Block Matrix</button><button data-v="v3">Monitors</button><button data-v="v4" id="tAdmin" hidden>Admin</button></div></header>
+<div class="f" id="fbar"><span id="vw" style="align-self:center;width:100%"></span>
+<label>Visit date from<input type="date" id="from"></label><label>Visit date to<input type="date" id="to"></label>
+<label id="distWrap">District<select id="dist"></select></label><label>Visit type<select id="vt"></select></label>
+<label>Level<select id="lv"></select></label><label>Designation<select id="ds"></select></label><button id="rs">Reset</button>
+<label>Export<select id="dset"><option value="visits">Filtered visits</option><option value="matrix">Block matrix</option><option value="monitors">Monitors</option></select></label><button id="dcsv">⬇ CSV</button><button id="dxl">⬇ XLSX</button></div>
+
+<div class="v on" id="v1"><div class="k" id="kpi"></div>
+<div class="c"><h2>Visits per day</h2><div class="ch"><canvas id="c1"></canvas></div></div>
+<div class="g"><div class="c"><h2>Visit type</h2><div class="ch"><canvas id="c2"></canvas></div></div>
+<div class="c"><h2>Monitoring level</h2><div class="ch"><canvas id="c3"></canvas></div></div>
+<div class="c"><h2>Top designations</h2><div class="ch"><canvas id="c4"></canvas></div></div></div>
+<div class="c"><h2>Geo-tagged visits</h2><canvas id="map"></canvas></div></div>
+<div class="v" id="v2"><div><h2 id="mxT" style="font-size:16px;color:var(--text);text-transform:none;margin:0 0 4px"></h2><p class="mut" id="mxP" style="margin:0 0 10px"></p></div><div class="c w" style="padding:0"><table id="mx"></table></div></div>
+<div class="v" id="v3"><div class="c w" style="padding:0"><table id="mt"></table></div></div>
+
+<div class="v" id="v4">
+  <div class="c"><h2>Cloud data</h2><div id="cloudInfo" class="mut"></div>
+    <div class="row"><label class="up">⬆ Choose CSV / XLSX<input type="file" id="up" accept=".csv,.xlsx,.xls" hidden></label><span id="upInfo" class="mut"></span></div>
+    <div class="row"><button class="btn p" id="upRep" disabled>Replace all cloud data</button><button class="btn" id="upApp" disabled>Append new rows only</button><button class="btn" id="fsync">Force full re-download</button></div>
+    <div class="bar"><i id="barI"></i></div><div class="mut" id="prog" style="margin-top:4px"></div></div>
+  <div class="c"><h2>Users</h2><div class="w" style="max-height:260px"><table id="ut"></table></div>
+    <div class="row"><button class="btn" id="bulk">⚙ Create logins for all districts</button><span class="mut" id="bulkI"></span></div>
+    <h2 id="uFT" style="margin-top:14px">Add user</h2>
+    <div class="fm">
+      <label>Username<input id="uU" autocapitalize="none"></label><label>Full name<input id="uN"></label>
+      <label>Role<select id="uR"><option value="district">District</option><option value="state">State</option></select></label>
+      <label id="uDW">District<input id="uD" list="dl"></label><datalist id="dl"></datalist>
+      <label>Password <span id="uPh">(min 8)</span><input id="uP" type="text" autocomplete="off"></label>
+      <label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="uA" checked style="min-height:auto">Active</label>
+      <button class="btn p" id="uS">Save user</button><button class="btn" id="uC">Clear</button></div>
+    <div class="mut" style="margin-top:8px">New or reset passwords are temporary: the user is forced to choose their own at first sign-in. District spelling must match the data (pick from the list).</div></div>
+</div>
+</div>
+
+<!-- change password -->
+<div id="pw" hidden><div class="card"><h1 id="pwT">Change password</h1><div class="mut" id="pwM"></div>
+  <form id="pwForm"><label>Current password<input id="po" type="password" autocomplete="current-password" required></label>
+  <label>New password (min 8)<input id="pn" type="password" autocomplete="new-password" required minlength="8"></label>
+  <label>Repeat new password<input id="pr" type="password" autocomplete="new-password" required minlength="8"></label>
+  <div class="row"><button class="btn p">Save</button><button type="button" class="btn" id="pc">Cancel</button></div></form><div class="err" id="pwE"></div></div></div>
+<div id="toast" hidden><span id="toastT"></span><button class="hb" id="toastB" hidden>Reload</button></div>
+
+<script>
+/* ═════ CONFIG: paste your Apps Script Web app URL (ends with /exec) ═════ */
+const API_URL='https://script.google.com/macros/s/AKfycbyzsE_0MpXqvDLzq8oaZ_mwGxGw9Q2R6pja5NH556ChQJSNcBn-kcazL0FxysDjzZDi/exec';
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const EMPTY=()=>({dist:[],blk:[],vtype:[],level:[],desig:[],team:[],name:[],date:[]});
+let S=null,L=EMPTY(),R=[],ver='',meta={},staged=null;
+const isState=()=>S&&S.user.role==='state';
+
+/* ═════ local cache (IndexedDB) ═════ */
+const idb={db:null,open(){return this.db||(this.db=new Promise((res,rej)=>{const q=indexedDB.open('smp-fvm',1);q.onupgradeneeded=()=>q.result.createObjectStore('kv');q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)}))},
+ async get(k){const d=await this.open();return new Promise((res,rej)=>{const r=d.transaction('kv').objectStore('kv').get(k);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})},
+ async set(k,v){const d=await this.open();return new Promise((res,rej)=>{const t=d.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=res;t.onerror=()=>rej(t.error)})},
+ async clear(){const d=await this.open();return new Promise((res,rej)=>{const t=d.transaction('kv','readwrite');t.objectStore('kv').clear();t.oncomplete=res;t.onerror=()=>rej(t.error)})}};
+
+/* ═════ toast ═════ */
+let tt;function toast(m,btn){$('toastT').textContent=m;$('toastB').hidden=!btn;$('toast').hidden=false;clearTimeout(tt);if(!btn)tt=setTimeout(()=>$('toast').hidden=true,4500)}
+
+/* ═════ API ═════ */
+async function api(action,extra){
+  if(!API_URL||/^PASTE/.test(API_URL))throw new Error('API_URL is not set in index.html');
+  const r=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({action,token:S&&S.token},extra||{}))});
+  const j=await r.json();
+  if(!j.ok&&j.code==='AUTH'&&S){await logout();$('lgErr').textContent=j.error||'Please sign in again.';throw new Error(j.error)}
+  if(!j.ok)throw new Error(j.error||'Request failed');return j}
+const netErr=e=>e instanceof TypeError||!navigator.onLine;
+
+/* ═════ login / logout ═════ */
+$('lgForm').onsubmit=async e=>{e.preventDefault();$('lgErr').textContent='';$('lgBtn').disabled=true;$('lgBtn').textContent='Signing in…';
+  try{const j=await api('login',{u:$('lu').value.trim(),p:$('lp').value});S={token:j.token,user:j.user};localStorage.setItem('smp_s',JSON.stringify(S));$('lp').value='';await enter()}
+  catch(x){$('lgErr').textContent=netErr(x)?'No connection. You need internet for the first sign-in.':x.message}
+  $('lgBtn').disabled=false;$('lgBtn').textContent='Sign in'};
+function wipeUI(){['kpi','mx','mt','ut','cloudInfo','upInfo','prog','vw','who','dist','vt','lv','ds'].forEach(i=>{$(i).innerHTML=''});
+  Object.keys(cs).forEach(k=>{try{cs[k].destroy()}catch(e){}delete cs[k]});const cv=$('map'),g=cv.getContext('2d');g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,cv.width,cv.height);
+  cur=[];mxA=[];mtA=[];users=[];staged=null;open_.clear();$('from').value=$('to').value='';$('barI').style.width='0'}
+async function logout(){localStorage.removeItem('smp_s');S=null;L=EMPTY();R=[];ver='';meta={};wipeUI();try{await idb.clear()}catch(e){}
+  $('app').hidden=true;$('lg').hidden=false;$('pw').hidden=true}
+$('out').onclick=()=>logout();
+
+/* ═════ enter app / role-based UI ═════ */
+function applyRole(){const u=S.user,st=isState();
+  $('who').innerHTML=esc(u.name||u.username)+' · <b>'+(st?'State':'District · '+esc(u.district))+'</b>';
+  $('tAdmin').hidden=!st;$('distWrap').hidden=!st;
+  $('tMx').textContent=st?'District / Block Matrix':'Block Matrix';
+  document.querySelectorAll('#tabs button').forEach((b,i)=>b.classList.toggle('active',i===0));
+  document.querySelectorAll('.v').forEach(v=>v.classList.toggle('on',v.id==='v1'));$('fbar').hidden=false}
+async function enter(){$('lg').hidden=true;$('app').hidden=false;applyRole();
+  try{const k='data:'+S.user.username,c=await idb.get(k);if(c&&c.R){L=c.L;R=c.R;ver=c.ver;meta=c.meta||{};setup();render();setSrc('Cached · '+new Date(c.syncAt).toLocaleString(),true)}else{setup();render()}}catch(e){setup();render()}
+  await sync(false);if(S&&S.user.mustChange)openPw(true)}
+function setSrc(t,off){$('src').textContent=t;$('pill').classList.toggle('off',!!off)}
+
+/* ═════ sync ═════ */
+let syncing=false;
+async function sync(force){if(syncing||!S)return;syncing=true;setSrc('Syncing…');
+  try{const j=await api('data',{ver:force?'':ver});
+    if(!j.unchanged){L=j.L;R=j.R;ver=j.ver;meta={at:j.at,total:j.total};await idb.set('data:'+S.user.username,{L,R,ver,meta,syncAt:Date.now()});setup();render()}
+    else{meta={at:j.at,total:j.total};try{const c=await idb.get('data:'+S.user.username);if(c){c.syncAt=Date.now();await idb.set('data:'+S.user.username,c)}}catch(e){}}
+    setSrc('Cloud · synced '+new Date().toLocaleTimeString()+' · '+R.length.toLocaleString()+' visits');cloudInfo()}
+  catch(e){if(netErr(e))setSrc(R.length?'Offline · showing saved data':'Offline · no saved data yet',true);else if(S){setSrc('Sync failed',true);toast(e.message)}}
+  syncing=false}
+$('syn').onclick=()=>sync(true);
+addEventListener('online',()=>sync(false));addEventListener('offline',()=>setSrc(R.length?'Offline · showing saved data':'Offline',true));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&S)sync(false)});
+
+/* ═════ filters / charts / tables (same logic as the original dashboard) ═════ */
+const fill=(id,a,all)=>{$(id).innerHTML=`<option value="">${all}</option>`+a.map((v,i)=>`<option value="${i}">${esc(v)}</option>`).join('')};
+let dates=[],F0='',F1='';
+function setup(){fill('dist',L.dist,'All districts');fill('vt',L.vtype,'All types');fill('lv',L.level,'All levels');fill('ds',L.desig,'All designations');
+  dates=L.date.filter(x=>x!=='na');F0=dates[0]||'';F1=dates[dates.length-1]||'';$('from').value=F0;$('to').value=F1}
+const cnt=(rows,k,n)=>{const a=new Array(n).fill(0);rows.forEach(r=>a[r[k]]++);return a};
+const topN=(a,l,n)=>a.map((v,i)=>[l[i],v]).filter(x=>x[1]).sort((x,y)=>y[1]-x[1]).slice(0,n);
+const cs={},PAL=['#fb923c','#f97316','#fbbf24','#c9a58c','#ef4444','#a16207','#78716c'];
+function mk(id,type,lab,dat,col,opt={}){const cl=type==='doughnut'?PAL:col;
+  if(typeof Chart==='undefined')return;
+  if(cs[id]){const c=cs[id];c.data.labels=lab;c.data.datasets[0].data=dat;c.update();return}
+  cs[id]=new Chart($(id),{type,data:{labels:lab,datasets:[{data:dat,backgroundColor:cl,borderColor:type==='line'?col:'#1c130c',borderWidth:type==='line'?2:1,tension:.25,pointRadius:0}]},
+  options:Object.assign({responsive:true,maintainAspectRatio:false,plugins:{legend:{display:type==='doughnut',position:'bottom',labels:{color:'#c9a58c'}}},scales:type==='doughnut'?{}:{x:{ticks:{color:'#c9a58c',maxTicksLimit:10},grid:{display:false}},y:{ticks:{color:'#c9a58c'},grid:{color:'#2e2015'},beginAtZero:true}}},opt)})}
+let cur=[],mxA=[],mtA=[],open_=new Set();
+function render(){if(!S)return;
+  const f=$('from').value,t=$('to').value,di=$('dist').value,vt=$('vt').value,lv=$('lv').value,ds=$('ds').value,st=isState();
+  const rows=cur=R.filter(r=>{const d=L.date[r[0]];return(!f||d>=f)&&(!t||d<=t)&&(di===''||r[1]==di)&&(vt===''||r[2]==vt)&&(lv===''||r[3]==lv)&&(ds===''||r[4]==ds)});
+  const n=rows.length,mons=new Set(),dists=new Set(),days=new Set();let geo=0,team=0;
+  rows.forEach(r=>{mons.add(r[6]);dists.add(r[1]);days.add(r[0]);if(r[7])geo++;if(L.team[r[5]]!=='individual')team++});
+  $('vw').innerHTML=`Viewing: <b>${st?'State'+(di!==''?' · '+esc(L.dist[di]):''):'District · '+esc(S.user.district)}</b> · ${n.toLocaleString()} of ${R.length.toLocaleString()} visits`;
+  $('kpi').innerHTML=[[n.toLocaleString(),'Total visits'],[mons.size.toLocaleString(),'Unique monitors'],st?[dists.size,'Districts covered']:[new Set(rows.map(r=>r[9])).size,'Blocks covered'],[days.size,'Active days'],[days.size?Math.round(n/days.size):0,'Avg visits / day'],[n?Math.round(100*team/n)+'%':'-','Team visits'],[n?Math.round(100*geo/n)+'%':'-','Geo-tagged']].map(k=>`<div class="c"><b>${k[0]}</b><span>${k[1]}</span></div>`).join('');
+  const by={};rows.forEach(r=>by[r[0]]=(by[r[0]]||0)+1);const ks=Object.keys(by).sort((a,b)=>L.date[a].localeCompare(L.date[b]));
+  mk('c1','line',ks.map(i=>L.date[i]),ks.map(i=>by[i]),'#fb923c');
+  let a=topN(cnt(rows,2,L.vtype.length),L.vtype,8);mk('c2','doughnut',a.map(x=>x[0]),a.map(x=>x[1]));
+  a=topN(cnt(rows,3,L.level.length),L.level,8);mk('c3','bar',a.map(x=>x[0]),a.map(x=>x[1]),'#f97316');
+  a=topN(cnt(rows,4,L.desig.length),L.desig,8);mk('c4','bar',a.map(x=>x[0]),a.map(x=>x[1]),'#fbbf24',{indexAxis:'y'});
+  const cv=$('map'),w=cv.clientWidth||600,h=340,dp=devicePixelRatio||1;cv.width=w*dp;cv.height=h*dp;const g=cv.getContext('2d');g.scale(dp,dp);
+  const x0=81.3,y0=17.7,sc=Math.min(w/6.3,h/5.25),ox=(w-6.3*sc)/2;g.fillStyle='#fb923c';g.globalAlpha=.35;
+  rows.forEach(r=>{if(r[7]){g.beginPath();g.arc(ox+(r[8]/100-x0)*sc,h-(r[7]/100-y0)*sc,2.2,0,6.3);g.fill()}});
+  /* matrix: State = district → block drill-down; District = flat block list */
+  const M={};rows.forEach(r=>{const d=M[r[1]]||(M[r[1]]={v:0,m:new Set(),b:{}});const k=r[9],B=d.b[k]||(d.b[k]={v:0,m:new Set(),bl:0,dl:0,tm:0,g:0});
+   [d,B].forEach(o=>{o.v++;o.m.add(r[6])});const lvn=L.level[r[3]];if(lvn==='block')B.bl++;if(lvn==='district')B.dl++;if(L.team[r[5]]!=='individual')B.tm++;if(r[7])B.g++});
+  const S_=(o,f)=>Object.values(o.b).reduce((s,b)=>s+b[f],0);const z=v=>`<td class="n ${v?'':'z'}">${v}</td>`;
+  $('mxT').textContent=st?'Field Visit Matrix — District / Block':'Field Visit Matrix — '+S.user.district+' blocks';
+  $('mxP').textContent=st?'Tap a district to expand its blocks. Totals follow the filters above.':'Totals follow the filters above.';
+  const first=st?'District / Block':'Block';
+  let h2=`<tr><th>${first}</th><th class="n">Visits</th><th class="n">Monitors</th><th class="n">Block-level</th><th class="n">District-level</th><th class="n">Team visits</th><th class="n">Geo-tagged %</th></tr>`,tot=[0,0,0,0,0];
+  mxA=[['District','Block','Visits','Monitors','Block-level','District-level','Team visits','Geo-tagged %']];
+  Object.keys(M).sort((x,y)=>M[y].v-M[x].v).forEach(di_=>{const d=M[di_],dn=L.dist[di_],bl=S_(d,'bl'),dl=S_(d,'dl'),tm=S_(d,'tm'),gg=S_(d,'g');tot[0]+=d.v;tot[1]+=bl;tot[2]+=dl;tot[3]+=tm;tot[4]+=gg;
+   if(st){h2+=`<tr class="d${open_.has(di_)?' open':''}" data-d="${di_}"><td><span class="car">▶</span>${esc(dn)}</td>${z(d.v)}${z(d.m.size)}${z(bl)}${z(dl)}${z(tm)}${z(Math.round(100*gg/d.v))}</tr>`}
+   mxA.push([dn,'',d.v,d.m.size,bl,dl,tm,Math.round(100*gg/d.v)]);
+   Object.keys(d.b).sort((x,y)=>d.b[y].v-d.b[x].v).forEach(k=>{const B=d.b[k];h2+=`<tr class="b${st?(open_.has(di_)?' show':''):' flat'}" data-p="${di_}"><td>${esc(L.blk[k])}</td>${z(B.v)}${z(B.m.size)}${z(B.bl)}${z(B.dl)}${z(B.tm)}${z(Math.round(100*B.g/B.v))}</tr>`;mxA.push([dn,L.blk[k],B.v,B.m.size,B.bl,B.dl,B.tm,Math.round(100*B.g/B.v)])})});
+  h2+=`<tr class="t"><td>Total</td><td class="n">${tot[0]}</td><td class="n">${mons.size}</td><td class="n">${tot[1]}</td><td class="n">${tot[2]}</td><td class="n">${tot[3]}</td><td class="n">${tot[0]?Math.round(100*tot[4]/tot[0]):0}</td></tr>`;$('mx').innerHTML=h2;
+  $('mx').querySelectorAll('.d').forEach(e=>e.onclick=()=>{const k=e.dataset.d;open_.has(k)?open_.delete(k):open_.add(k);e.classList.toggle('open');$('mx').querySelectorAll(`[data-p="${k}"]`).forEach(b=>b.classList.toggle('show'))});
+  const mAll=topN(cnt(rows,6,L.name.length),L.name,1e6);mtA=[['Rank','Monitor','Visits']].concat(mAll.map((m,i)=>[i+1,m[0],m[1]]));
+  $('mt').innerHTML='<tr><th>#</th><th>Monitor</th><th class="n">Visits</th></tr>'+mAll.slice(0,200).map((m,i)=>`<tr><td>${i+1}</td><td>${esc(m[0])}</td><td class="n">${m[1]}</td></tr>`).join('')}
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.v').forEach(v=>v.classList.toggle('on',v.id===b.dataset.v));
+  $('fbar').hidden=b.dataset.v==='v4';if(b.dataset.v==='v4')openAdmin();else render()});
+['from','to','dist','vt','lv','ds'].forEach(i=>$(i).onchange=render);
+$('rs').onclick=()=>{['dist','vt','lv','ds'].forEach(i=>$(i).value='');$('from').value=F0;$('to').value=F1;render()};
+
+/* ═════ export (works on GitHub Pages / installed PWA) ═════ */
+const cell=v=>{v=v==null?'':String(v);return /[",\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+const toCSV=a=>'\ufeff'+a.map(r=>r.map(cell).join(',')).join('\r\n');
+const visitsA=()=>{const a=[['Date','District','Block','Visit type','Level','Designation','Team','Monitor','Latitude','Longitude']];cur.forEach(r=>a.push([L.date[r[0]],L.dist[r[1]],L.blk[r[9]],L.vtype[r[2]],L.level[r[3]],L.desig[r[4]],L.team[r[5]],L.name[r[6]],r[7]?r[7]/100:'',r[8]?r[8]/100:'']));return a};
+const SETS={visits:['Visits',visitsA],matrix:['Matrix',()=>mxA],monitors:['Monitors',()=>mtA]};
+function saveBlob(name,blob){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500)}
+function dl(fmt){const k=$('dset').value,a=SETS[k][1](),tag=isState()?'state':S.user.district.toLowerCase().replace(/\W+/g,'_'),name=`field_visits_${tag}_${k}_${new Date().toISOString().slice(0,10)}.${fmt}`;
+  if(fmt==='csv')return saveBlob(name,new Blob([toCSV(a)],{type:'text/csv;charset=utf-8'}));
+  if(typeof XLSX==='undefined')return alert('XLSX library not loaded (needs internet once).');
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(a),SETS[k][0]);saveBlob(name,new Blob([XLSX.write(wb,{type:'array',bookType:'xlsx'})],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}))}
+$('dcsv').onclick=()=>dl('csv');$('dxl').onclick=()=>dl('xlsx');
+
+/* ═════ ADMIN (State only): upload → cloud, users ═════ */
+const AL={date:['visit_detail-cdate','Date'],d1:['monitor-district1'],d2:['visit_detail-district2','District'],blk:['visit_detail-block2','Block'],b1:['monitor-block1'],vtype:['visit_detail-visit_type','Visit type'],level:['monitor-level','Level'],desig:['monitor-designation1','Designation'],team:['visit-visit_team','Team'],name:['monitor-name1','Monitor'],lat:['visit_detail-geo_location-Latitude','Latitude'],lon:['visit_detail-geo_location-Longitude','Longitude']};
+const KEEP=[].concat(...Object.values(AL)),prune=x=>{const o={};KEEP.forEach(k=>{if(x[k]!==undefined)o[k]=x[k]});return o};
+const pick=(r,ks)=>{for(const k of ks){const v=r[k];if(v!==undefined&&v!==null&&v!=='')return v}return ''};
+function parseRecs(recs){const T=[];let skip=0;
+  for(const r of recs){let d=pick(r,AL.date);d=d instanceof Date?new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10):String(d).slice(0,10);
+   if(!/^\d{4}-\d{2}-\d{2}$/.test(d)){skip++;continue}
+   const s=k=>String(pick(r,AL[k])).trim(),la=parseFloat(pick(r,AL.lat)),lo=parseFloat(pick(r,AL.lon)),ok=la>=17.5&&la<=22.7&&lo>=81&&lo<=87.7;
+   T.push([d,s('d2')||s('d1')||'Unknown',s('blk')||s('b1')||'Unspecified',s('vtype')||'na',s('level')||'na',s('desig').replace(/_/g,' ')||'other',s('team')||'na',(s('name')||'Unknown').toLowerCase().replace(/\b\w/g,c=>c.toUpperCase()),ok?Math.round(la*100):0,ok?Math.round(lo*100):0])}
+  return{T,skip}}
+$('up').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;staged=null;$('upRep').disabled=$('upApp').disabled=true;$('upInfo').textContent='Reading '+f.name+' …';
+  const done=recs=>{setTimeout(()=>{const p=parseRecs(recs);if(!p.T.length){$('upInfo').textContent='No usable rows (need a visit date column in YYYY-MM-DD).';return}
+    staged=p.T;$('upInfo').textContent=`${f.name}: ${p.T.length.toLocaleString()} valid rows`+(p.skip?` · ${p.skip.toLocaleString()} skipped (no valid date)`:'');$('upRep').disabled=$('upApp').disabled=false},30)};
+  if(/\.csv$/i.test(f.name)){const recs=[];Papa.parse(f,{header:true,skipEmptyLines:true,chunk:r=>r.data.forEach(x=>recs.push(prune(x))),complete:()=>done(recs),error:err=>{$('upInfo').textContent='Could not read CSV: '+err}})}
+  else{const fr=new FileReader();fr.onload=()=>{try{const wb=XLSX.read(fr.result,{type:'array',cellDates:true});done(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''}).map(prune))}catch(x){$('upInfo').textContent='Could not read file: '+x.message}};fr.readAsArrayBuffer(f)}};
+async function push(mode){if(!staged)return;
+  if(mode==='replace'&&!confirm('Replace ALL cloud data with these '+staged.length.toLocaleString()+' rows? District users will see the new data on their next sync.'))return;
+  $('upRep').disabled=$('upApp').disabled=true;const N=3000,bar=$('barI');
+  try{for(let i=0;i<staged.length;i+=N){$('prog').textContent=`Uploading ${Math.min(i+N,staged.length).toLocaleString()} / ${staged.length.toLocaleString()} …`;bar.style.width=(100*Math.min(i+N,staged.length)/staged.length*.9)+'%';await api('stage',{rows:staged.slice(i,i+N),reset:i===0})}
+    $('prog').textContent='Merging into the cloud sheet …';const j=await api('commit',{mode});bar.style.width='100%';
+    $('prog').textContent=`Done: ${j.added.toLocaleString()} rows added`+(j.skipped?`, ${j.skipped.toLocaleString()} duplicates skipped`:'')+` · cloud now holds ${j.total.toLocaleString()} rows.`;staged=null;$('upInfo').textContent='';await sync(true)}
+  catch(x){$('prog').textContent='Upload failed: '+x.message+' — nothing was changed in the live data unless the merge step had started.';$('upRep').disabled=$('upApp').disabled=false}}
+$('upRep').onclick=()=>push('replace');$('upApp').onclick=()=>push('append');$('fsync').onclick=()=>sync(true);
+function cloudInfo(){if(!isState())return;$('cloudInfo').textContent=meta.total!=null?`Cloud sheet holds ${Number(meta.total).toLocaleString()} visits · last updated ${meta.at?new Date(meta.at).toLocaleString():'—'}`:''}
+let users=[];
+async function openAdmin(){cloudInfo();$('dl').innerHTML=L.dist.map(d=>`<option value="${esc(d)}">`).join('');await loadUsers()}
+async function loadUsers(){try{users=(await api('users')).users;$('ut').innerHTML='<tr><th>User</th><th>Name</th><th>Role</th><th>District</th><th>Active</th><th>Last login</th><th></th></tr>'+users.map((u,i)=>`<tr><td>${esc(u.username)}</td><td>${esc(u.name)}</td><td>${esc(u.role)}</td><td>${esc(u.district)}</td><td>${u.active?'✔':'✖'}</td><td>${u.lastLogin?new Date(u.lastLogin).toLocaleDateString():'—'}</td><td><button class="btn" data-i="${i}">Edit</button></td></tr>`).join('');
+  $('ut').querySelectorAll('button').forEach(b=>b.onclick=()=>editUser(users[b.dataset.i]))}catch(e){$('ut').innerHTML='<tr><td>'+esc(e.message)+'</td></tr>'}}
+function editUser(u){$('uFT').textContent=u?'Edit user — '+u.username:'Add user';$('uU').value=u?u.username:'';$('uU').readOnly=!!u;$('uN').value=u?u.name:'';$('uR').value=u?u.role:'district';$('uD').value=u?u.district:'';$('uP').value='';$('uA').checked=u?u.active:true;$('uPh').textContent=u?'(leave blank to keep)':'(min 8)';roleUI()}
+function roleUI(){$('uDW').hidden=$('uR').value!=='district'}$('uR').onchange=roleUI;$('uC').onclick=()=>editUser(null);editUser(null);
+$('bulk').onclick=async()=>{
+  if(!confirm('Create a login for every district that does not have one yet?\n\nYou will get a CSV with temporary passwords. They are shown only this once; only hashes are stored.'))return;
+  $('bulk').disabled=true;const all=[];let existing=null,err='';
+  try{for(;;){const j=await api('bulk_districts',{limit:8});if(existing===null)existing=j.existing;all.push(...j.created);$('bulkI').textContent='Created '+all.length+' …';if(!j.remaining||!j.created.length)break}}
+  catch(e){err=e.message}
+  if(all.length){const site=location.origin+location.pathname,csv=[['username','district','temporary_password','site']].concat(all.map(c=>[c.username,c.district,c.password,site]));
+    saveBlob('district_logins_'+new Date().toISOString().slice(0,10)+'.csv',new Blob([toCSV(csv)],{type:'text/csv;charset=utf-8'}))}
+  $('bulkI').textContent=err?('Stopped: '+err+(all.length?' — '+all.length+' logins were created; their CSV was downloaded.':'')):(all.length?`Created ${all.length} logins (${existing} districts already had one). CSV downloaded: share it securely, then delete it.`:'Every district already has a login.');
+  $('bulk').disabled=false;loadUsers()};
+$('uS').onclick=async()=>{try{await api('user_save',{username:$('uU').value.trim(),name:$('uN').value,role:$('uR').value,district:$('uD').value,password:$('uP').value,active:$('uA').checked});toast('User saved');editUser(null);loadUsers()}catch(e){toast(e.message)}};
+
+/* ═════ change password ═════ */
+let pwForced=false;
+function openPw(forced){pwForced=!!forced;$('pwT').textContent=forced?'Set your own password':'Change password';$('pwM').textContent=forced?'Your account uses a temporary password. Choose a new one to continue.':'';$('pc').hidden=pwForced;$('pwE').textContent='';$('pwForm').reset();$('pw').hidden=false}
+$('chpw').onclick=()=>openPw(false);$('pc').onclick=()=>$('pw').hidden=true;
+$('pwForm').onsubmit=async e=>{e.preventDefault();if($('pn').value!==$('pr').value){$('pwE').textContent='New passwords do not match.';return}
+  try{const j=await api('pw_change',{old:$('po').value,pw:$('pn').value});S={token:j.token,user:j.user};localStorage.setItem('smp_s',JSON.stringify(S));$('pw').hidden=true;toast('Password changed')}catch(x){$('pwE').textContent=x.message}};
+
+/* ═════ PWA: service worker, update prompt, install ═════ */
+const hadCtrl=!!(navigator.serviceWorker&&navigator.serviceWorker.controller);
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').then(reg=>{
+  reg.addEventListener('updatefound',()=>{const w=reg.installing;w&&w.addEventListener('statechange',()=>{if(w.state==='installed'&&navigator.serviceWorker.controller){toast('A new version is ready.',true);$('toastB').onclick=()=>w.postMessage('SKIP_WAITING')}})});
+  let rl=false;const had=hadCtrl;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had&&!rl){rl=true;location.reload()}})}).catch(()=>{}));
+let dip=null;addEventListener('beforeinstallprompt',e=>{e.preventDefault();dip=e;$('inst').hidden=$('inst2').hidden=false});
+const doInst=async()=>{if(!dip)return;dip.prompt();await dip.userChoice;dip=null;$('inst').hidden=$('inst2').hidden=true};$('inst').onclick=$('inst2').onclick=doInst;
+addEventListener('appinstalled',()=>{$('inst').hidden=$('inst2').hidden=true});
+if(/iphone|ipad|ipod/i.test(navigator.userAgent)&&!navigator.standalone)$('iosHint').hidden=false;
+addEventListener('resize',()=>{if(S&&!$('app').hidden&&$('v1').classList.contains('on'))render()});
+
+/* ═════ boot ═════ */
+(function(){let s=null;try{s=JSON.parse(localStorage.getItem('smp_s')||'null')}catch(e){}
+  if(s&&s.token&&s.user){S=s;enter()}else $('lg').hidden=false})();
+</script></body></html>
