@@ -481,7 +481,7 @@ $('up').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f||!isState
   else{const fr=new FileReader();fr.onload=()=>{try{const wb=XLSX.read(fr.result,{type:'array',cellDates:true});done(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''}).map(prune))}catch(x){$('upInfo').textContent='Could not read file: '+x.message}};fr.readAsArrayBuffer(f)}};
 async function push(mode){if(!staged)return;
   if(mode==='replace'&&!confirm('Replace ALL cloud data with these '+staged.length.toLocaleString()+' rows? District users will see the new data on their next sync.'))return;
-  $('upRep').disabled=$('upApp').disabled=true;const N=400,bar=$('barI');
+  $('upRep').disabled=$('upApp').disabled=true;const N=100,bar=$('barI');
   try{for(let i=0;i<staged.length;i+=N){$('prog').textContent=`Uploading ${Math.min(i+N,staged.length).toLocaleString()} / ${staged.length.toLocaleString()} …`;bar.style.width=(100*Math.min(i+N,staged.length)/staged.length*.9)+'%';await api('stage',{rows:staged.slice(i,i+N),reset:i===0})}
     $('prog').textContent='Merging into the cloud sheet …';const j=await api('commit',{mode});bar.style.width='100%';
     $('prog').textContent=`Done: ${j.added.toLocaleString()} rows added`+(j.skipped?`, ${j.skipped.toLocaleString()} duplicates skipped`:'')+(j.filled?`, full details filled for ${j.filled.toLocaleString()} existing rows`:'')+` · cloud now holds ${j.total.toLocaleString()} rows.`;staged=null;$('upInfo').textContent='';await sync(true)}
