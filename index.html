@@ -72,6 +72,13 @@ label.up{display:inline-flex;align-items:center;cursor:pointer;border:1px solid 
 #rd dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0 0 12px}#rd dt{color:var(--muted)}#rd dd{margin:0;font-weight:600;word-break:break-word}
 #rd .rf{display:grid;grid-template-columns:minmax(120px,38%) 1fr;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-top:6px}#rd .rf>div{padding:5px 9px;border-bottom:1px solid var(--border);font-size:12.5px;word-break:break-word}#rd .rf>div:nth-child(odd){color:var(--muted);background:rgba(0,0,0,.14)}#rd #rdQ{width:100%;margin-top:6px}
 #rd h3{font-size:13px;margin:12px 0 6px;color:var(--accent)}#rd .rl div{padding:4px 0;border-bottom:1px solid var(--border);font-size:13px}
+#rp{position:fixed;inset:0;z-index:60;background:#fff;color:#111;overflow:auto;padding:14px}#rp[hidden]{display:none}
+#rp .rpb{max-width:820px;margin:0 auto;font-size:13px;line-height:1.45}#rp .btn{color:#111;border-color:#999;background:#f3f3f3}
+#rp .rpt{display:flex;gap:8px;justify-content:flex-end;margin-bottom:8px}#rp h1{font-size:20px;margin:0 0 4px}#rp .rpm{color:#444;margin-bottom:10px}
+#rp h2{font-size:14px;margin:16px 0 6px;padding:4px 8px;background:#eee;border-left:4px solid #f97316}
+#rp table{width:100%;border-collapse:collapse}#rp td{border:1px solid #ccc;padding:4px 8px;vertical-align:top;word-break:break-word}#rp td:first-child{width:34%;color:#444;background:#fafafa}
+#rp .ob{border:1px solid #ccc;border-radius:6px;padding:6px 10px;margin:6px 0;white-space:pre-wrap}#rp .ob b{display:block;color:#444;font-size:12px;margin-bottom:2px}
+@media print{body>*:not(#rp){display:none!important}#rp{position:static;overflow:visible;padding:0}#rp .rpt{display:none}#rp h2{break-after:avoid}#rp tr,#rp .ob{break-inside:avoid}}
 #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--panel);box-shadow:0 4px 16px rgba(0,0,0,.45);border:1px solid var(--accent2);padding:10px 14px;border-radius:10px;z-index:30;max-width:90vw;display:flex;gap:10px;align-items:center}
 @media(max-width:640px){
 body{font-size:14px;padding-bottom:calc(66px + env(safe-area-inset-bottom,0px))}
@@ -175,7 +182,7 @@ th,td{padding:8px 8px;font-size:12.5px}
 <div class="c"><h2 id="smTH">Top 5 districts by visits</h2><div class="w"><table id="smT"></table></div></div>
 <div class="c"><h2 id="smLH">Needs attention: longest since last visit</h2><div class="w"><table id="smL"></table></div></div></div></div>
 <div class="v" id="v6"><div><h2 style="font-size:16px;color:var(--text);text-transform:none;margin:0 0 4px">Records</h2><p class="mut" id="rcP" style="margin:0 0 10px"></p></div>
-<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input id="rcQ" placeholder="Search monitor, district, block, type…" style="flex:1;min-width:200px"><span class="pill" id="rcChip" hidden></span><button class="btn" id="rcClr" hidden>Clear card filter</button></div>
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input id="rcQ" placeholder="Search monitor, district, block, type…" style="flex:1;min-width:200px"><span class="pill" id="rcChip" hidden></span><button class="btn" id="rcClr" hidden>Clear card filter</button><button class="btn" id="rcFind">⬇ Findings XLSX</button></div>
 <div class="c w rcW" style="padding:0"><table id="rcT"></table></div>
 <div style="display:flex;gap:10px;align-items:center;justify-content:center"><button class="btn" id="rcPrev">‹ Prev</button><span class="mut" id="rcPg"></span><button class="btn" id="rcNext">Next ›</button></div></div>
 <div class="v" id="v4">
@@ -241,7 +248,7 @@ $('lgForm').onsubmit=async e=>{e.preventDefault();$('lgErr').textContent='';$('l
   try{const j=await api('login',{u:($('lu').value==='__other'?$('luo').value:$('lu').value).trim(),p:$('lp').value});S={token:j.token,user:j.user};localStorage.setItem('smp_s',JSON.stringify(S));$('lp').value='';await enter()}
   catch(x){$('lgErr').textContent=netErr(x)?(navigator.onLine?'Cannot reach the server. Check that the Apps Script deployment access is set to Anyone, and that API_URL is the /exec URL.':'No connection. You need internet for the first sign-in.'):x.message}
   $('lgBtn').disabled=false;$('lgBtn').textContent='Sign in'};
-function wipeUI(){$('rd').hidden=true;['kpi','mx','mt','ut','cloudInfo','upInfo','prog','vw','who','dist','bk','vt','lv','ds','tm'].forEach(i=>{$(i).innerHTML=''});
+function wipeUI(){$('rd').hidden=true;if($('rp'))$('rp').hidden=true;['kpi','mx','mt','ut','cloudInfo','upInfo','prog','vw','who','dist','bk','vt','lv','ds','tm'].forEach(i=>{$(i).innerHTML=''});
   Object.keys(cs).forEach(k=>{try{cs[k].destroy()}catch(e){}delete cs[k]});const cv=$('map'),g=cv.getContext('2d');g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,cv.width,cv.height);
   cur=[];mxA=[];mtA=[];users=[];staged=null;$('upP').hidden=true;kf=null;rcPage=0;$('rcQ').value='';$('rcT').innerHTML='';$('smK').innerHTML='';open_.clear();$('from').value=$('to').value='';$('barI').style.width='0'}
 async function logout(){localStorage.removeItem('smp_s');S=null;L=EMPTY();R=[];ver='';meta={};wipeUI();try{await idb.clear()}catch(e){}
@@ -373,7 +380,7 @@ function renderRecords(rows){if(!$('v6').classList.contains('on'))return;
 function showRec(r){const E=esc,nm=L.name[r[6]],pl=GEO.name(r),dt=L.date[r[0]],wd=dt&&dt!=='na'?new Date(dt+'T00:00:00').toLocaleDateString(undefined,{weekday:'long'}):'';
  const mine=R.filter(x=>x[6]===r[6]).sort((x,y)=>L.date[x[0]]<L.date[y[0]]?1:-1),last5=mine.slice(0,6).filter(x=>x!==r).slice(0,5);
  const ll=r[7]?`${(r[7]/100).toFixed(2)}, ${(r[8]/100).toFixed(2)}`:'';
- $('rdc').innerHTML=`<h2><span>Visit details</span><button class="btn" id="rdX">✕ Close</button></h2><dl>
+ $('rdc').innerHTML=`<h2><span>Visit details</span><span><button class="btn" id="rdR">📄 Report</button> <button class="btn" id="rdX">✕ Close</button></span></h2><dl>
  <dt>Date</dt><dd>${E(dt)}${wd?' · '+E(wd):''}</dd><dt>District</dt><dd>${E(L.dist[r[1]])}</dd><dt>Block</dt><dd>${E(L.blk[r[9]])}</dd>
  <dt>Visit type</dt><dd>${E(L.vtype[r[2]])}</dd><dt>Level</dt><dd>${E(L.level[r[3]])}</dd><dt>Designation</dt><dd>${E(L.desig[r[4]])}</dd>
  <dt>Team</dt><dd>${E(L.team[r[5]])}</dd><dt>Monitor</dt><dd>${E(nm)}</dd>
@@ -381,8 +388,42 @@ function showRec(r){const E=esc,nm=L.name[r[6]],pl=GEO.name(r),dt=L.date[r[0]],w
  <h3>${E(nm)} — ${mine.length.toLocaleString()} visit${mine.length===1?'':'s'} in total${mine[0]?' · last '+E(L.date[mine[0][0]]):''}</h3>
  <div class="rl">${last5.length?last5.map(x=>`<div>${E(L.date[x[0]])} · ${E(L.vtype[x[2]])} · ${E(L.blk[x[9]])}${x[7]?'':' · <span class="mut">no geo</span>'}</div>`).join(''):'<div class="mut">No other visits.</div>'}</div>`;
  $('rdc').insertAdjacentHTML('beforeend','<h3>Full visit details (as in the uploaded CSV)</h3><div id="rdF" class="mut">Loading…</div>');
- $('rd').hidden=false;$('rdX').onclick=()=>$('rd').hidden=true;loadDet(r)}
+ $('rd').hidden=false;$('rdX').onclick=()=>$('rd').hidden=true;$('rdR').onclick=()=>openReport(r);loadDet(r)}
 const DET={};
+const SKIP=/^(meta|KEY|SubmitterID|SubmitterName|AttachmentsPresent|AttachmentsExpected|Status|ReviewState|DeviceID|Edits|FormVersion|photos|SubmissionDate|start|end)(-|$)|generated_note/;
+const OBS_RE=/^observation\d-|-observ|-action_plan$|-remark$|^tele_consult-issue$|^session_info-reason/;
+const OBSL={'observation1-observ_fac':'Facility observations (1)','observation2-observ_fac2':'Facility observations (2)','vhsnd-observ_vhsnd':'VHSND observations','session_info-observ_ri':'Session (RI) observations','asha-observ_asha':'ASHA observations','gks-observ_gks':'GKS observations','mht-observ_mht':'MHT observations','mhu-observ_mhu':'MHU observations','aww_school-observ_aww':'AWW / School observations','other_com-observ_com':'Other community observations','special-observ_special':'Special visit observations','other-observ_other':'Other observations','sector_meeting-action_plan':'Sector meeting — action plan','sector_meeting-remark':'Sector meeting — remarks','tele_consult-issue':'Tele-consultation — issues','session_info-reason_no':'Session not held — reason','session_info-reason_other':'Session not held — other reason'};
+const SEC={monitor:'Monitor details',visit_detail:'Visit details',facility:'Facility visited',lab_service:'Laboratory services',pharmacy:'Pharmacy',tele_consult:'Tele-consultation',BMW:'Bio-medical waste',vhsnd:'VHSND',asha:'ASHA',gks:'GKS',sector_meeting:'Sector meeting'};
+const pretty=t=>{t=String(t).replace(/_+/g,' ').trim();return t.charAt(0).toUpperCase()+t.slice(1)};
+const dkey=r=>r[10]+'|'+L.date[r[0]]+'|'+L.name[r[6]];
+async function getDet(r){const k=dkey(r);if(!(k in DET)){const j=await api('detail',{row:r[10],chk:L.date[r[0]]+'|'+L.name[r[6]]});DET[k]=j.extra}return DET[k]}
+async function openReport(r){let x;
+ if(r[10]==null)return alert('Sync the data once (reopen the app online) to enable reports.');
+ try{x=await getDet(r)}catch(e){return alert(netErr(e)?'Offline — the report needs a connection.':e.message)}
+ if(!x)return alert('Full CSV details were not stored for this visit. Upload the CSV again with "Add new rows" to fill them in.');
+ const g={},obs=[];for(const k in x){if(SKIP.test(k))continue;if(OBS_RE.test(k)){obs.push([OBSL[k]||pretty(k),x[k]]);continue}const i=k.indexOf('-'),pf=i<0?'General':k.slice(0,i);(g[pf]=g[pf]||[]).push([pretty(i<0?k:k.slice(i+1)),x[k]])}
+ const mons=[1,2,3,4].map(n=>x['monitor-name'+n]).filter(Boolean).join(', ')||L.name[r[6]],place=x['facility-name_fac']||x['visit_detail-name_vsc']||'';
+ let p=$('rp');if(!p){p=document.createElement('div');p.id='rp';document.body.appendChild(p)}
+ p.innerHTML=`<div class="rpb"><div class="rpt"><button class="btn" id="rpP">🖨 Print / Save as PDF</button><button class="btn" id="rpX">✕ Close</button></div>
+ <h1>Field Visit Report</h1><div class="rpm">${esc(L.date[r[0]])} · ${esc(L.dist[r[1]])} · ${esc(L.blk[r[9]])} · ${esc(L.vtype[r[2]])} · ${esc(L.level[r[3]])}${place?' · '+esc(place):''}<br>Monitor(s): ${esc(mons)} · ${esc(L.desig[r[4]])} · Team: ${esc(L.team[r[5]])}</div>
+ <h2>Observations &amp; findings</h2>${obs.length?obs.map(o=>`<div class="ob"><b>${esc(o[0])}</b>${esc(o[1])}</div>`).join(''):'<div class="ob">No observations were recorded for this visit.</div>'}
+ ${Object.keys(g).map(pf=>`<h2>${esc(SEC[pf]||pretty(pf))}</h2><table>${g[pf].map(f=>`<tr><td>${esc(f[0])}</td><td>${esc(f[1])}</td></tr>`).join('')}</table>`).join('')}</div>`;
+ p.hidden=false;$('rd').hidden=true;p.scrollTop=0;$('rpX').onclick=()=>p.hidden=true;$('rpP').onclick=()=>window.print()}
+async function fetchDets(rows,prog){const need=rows.filter(r=>r[10]!=null&&!(dkey(r) in DET));for(let i=0;i<need.length;i+=150){const part=need.slice(i,i+150),j=await api('details',{rows:part.map(r=>r[10])}),m={};j.items.forEach(it=>m[it.row]=it.extra);part.forEach(r=>{DET[dkey(r)]=m[r[10]]||null});if(prog)prog(Math.min(i+150,need.length),need.length)}}
+$('rcFind').onclick=async()=>{const rows=rcA.filter(r=>r[10]!=null),b=$('rcFind'),t0=b.textContent;
+ if(!rows.length)return alert('No records to export (sync the data first).');
+ if(rows.length>3000)return alert(rows.length.toLocaleString()+' visits match. Narrow the filters to 3,000 or fewer first.');
+ b.disabled=true;
+ try{await fetchDets(rows,(d,n)=>b.textContent='Fetching '+d+'/'+n+'…');
+  const keys=[],seen=new Set(),out=[];
+  rows.forEach(r=>{const x=DET[dkey(r)];if(!x)return;const o={};for(const k in x)if(OBS_RE.test(k)&&String(x[k]).trim()){o[k]=x[k];if(!seen.has(k)){seen.add(k);keys.push(k)}}if(Object.keys(o).length)out.push([r,x,o])});
+  if(!out.length)return alert('No observations or findings found in these visits.');
+  const ord=Object.keys(OBSL);keys.sort((a,c)=>{const i=ord.indexOf(a),j=ord.indexOf(c);return(i<0?99:i)-(j<0?99:j)});
+  const aoa=[['Date','District','Block','Visit type','Level','Designation','Team','Monitor','Facility / VSC name'].concat(keys.map(k=>OBSL[k]||pretty(k)))].concat(out.map(([r,x,o])=>[L.date[r[0]],L.dist[r[1]],L.blk[r[9]],L.vtype[r[2]],L.level[r[3]],L.desig[r[4]],L.team[r[5]],L.name[r[6]],x['facility-name_fac']||x['visit_detail-name_vsc']||''].concat(keys.map(k=>o[k]||''))));
+  if(typeof XLSX==='undefined')return alert('XLSX library not loaded (needs internet once).');
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(aoa),'Findings');
+  saveBlob('findings_'+(isState()?'state':S.user.district.toLowerCase().replace(/\W+/g,'_'))+'_'+new Date().toISOString().slice(0,10)+'.xlsx',new Blob([XLSX.write(wb,{type:'array',bookType:'xlsx'})],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+ }catch(e){alert(netErr(e)?'Offline — this export needs a connection.':e.message)}finally{b.disabled=false;b.textContent=t0}};
 async function loadDet(r){const box=$('rdF'),key=r[10]+'|'+L.date[r[0]]+'|'+L.name[r[6]];
  const draw=x=>{if(!$('rdF')||$('rdF')!==box)return;const ks=x?Object.keys(x):[];
   if(!ks.length){box.innerHTML='Full CSV details were not stored for this visit. Upload the CSV again with <b>Add new rows</b> to fill them in (State admin).';return}
