@@ -481,8 +481,11 @@ $('up').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f||!isState
   else{const fr=new FileReader();fr.onload=()=>{try{const wb=XLSX.read(fr.result,{type:'array',cellDates:true});done(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''}).map(prune))}catch(x){$('upInfo').textContent='Could not read file: '+x.message}};fr.readAsArrayBuffer(f)}};
 async function push(mode){if(!staged)return;
   if(mode==='replace'&&!confirm('Replace ALL cloud data with these '+staged.length.toLocaleString()+' rows? District users will see the new data on their next sync.'))return;
-  $('upRep').disabled=$('upApp').disabled=true;const N=100,bar=$('barI');
-  try{for(let i=0;i<staged.length;i+=N){$('prog').textContent=`Uploading ${Math.min(i+N,staged.length).toLocaleString()} / ${staged.length.toLocaleString()} …`;bar.style.width=(100*Math.min(i+N,staged.length)/staged.length*.9)+'%';await api('stage',{rows:staged.slice(i,i+N),reset:i===0})}
+  $('upRep').disabled=$('upApp').disabled=true;const bar=$('barI');
+  try{const batches=[];{let c=[],sz=0;for(const r of staged){const s=(r[10]?String(r[10]).length:0)+150;if(c.length&&(sz+s>450000||c.length>=600)){batches.push(c);c=[];sz=0}c.push(r);sz+=s}if(c.length)batches.push(c)}
+    let done=0,nx=1,fail=false;const tick=n=>{done+=n;$('prog').textContent=`Uploading ${done.toLocaleString()} / ${staged.length.toLocaleString()} …`;bar.style.width=(90*done/staged.length)+'%'};
+    await api('stage',{rows:batches[0],reset:true});tick(batches[0].length);
+    await Promise.all([0,1].map(async()=>{while(!fail&&nx<batches.length){const b=batches[nx++];try{await api('stage',{rows:b,reset:false})}catch(e){fail=true;throw e}tick(b.length)}}));
     $('prog').textContent='Merging into the cloud sheet …';const j=await api('commit',{mode});bar.style.width='100%';
     $('prog').textContent=`Done: ${j.added.toLocaleString()} rows added`+(j.skipped?`, ${j.skipped.toLocaleString()} duplicates skipped`:'')+(j.filled?`, full details filled for ${j.filled.toLocaleString()} existing rows`:'')+` · cloud now holds ${j.total.toLocaleString()} rows.`;staged=null;$('upInfo').textContent='';await sync(true)}
   catch(x){$('prog').textContent='Upload failed: '+x.message+' — nothing was changed in the live data unless the merge step had started.';$('upRep').disabled=$('upApp').disabled=false}}
