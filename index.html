@@ -465,31 +465,50 @@ $('dcsv').onclick=()=>dl('csv');$('dxl').onclick=()=>dl('xlsx');
 
 /* ═════ ADMIN (State only): upload → cloud, users ═════ */
 const AL={date:['visit_detail-cdate','cdate','Date','start','SubmissionDate'],d1:['monitor-district1','district1'],d2:['visit_detail-district2','district2','District'],blk:['visit_detail-block2','block2','Block'],b1:['monitor-block1','block1'],vtype:['visit_detail-visit_type','visit_type','Visit type'],level:['monitor-level','level','Level'],desig:['monitor-designation1','designation1','Designation'],team:['visit-visit_team','visit_team','Team'],name:['monitor-name1','name1','Monitor'],lat:['visit_detail-geo_location-Latitude','geo_location-Latitude','Latitude'],lon:['visit_detail-geo_location-Longitude','geo_location-Longitude','Longitude']};
-const KEEP=[].concat(...Object.values(AL)),KS=new Set(KEEP),prune=x=>{const o={},e={};for(const k in x){let v=x[k];if(v===undefined||v===null||v==='')continue;if(v instanceof Date)v=new Date(v.getTime()-v.getTimezoneOffset()*6e4).toISOString().replace('T',' ').slice(0,19);if(typeof v==='string'&&v.length>500)v=v.slice(0,500);e[k]=v;if(KS.has(k))o[k]=x[k]}
-  let j=JSON.stringify(e);if(j.length>45000){for(const k in e)if(typeof e[k]==='string')e[k]=e[k].slice(0,100);j=JSON.stringify(e).slice(0,45000)}o.__x=j;return o};
+const KEEP=[].concat(...Object.values(AL)),KS=new Set(KEEP),prune=x=>{const o={},e={};for(const k in x){let v=x[k];if(v===undefined||v===null||v==='')continue;if(v instanceof Date)v=new Date(v.getTime()-v.getTimezoneOffset()*6e4).toISOString().replace('T',' ').slice(0,19);if(typeof v==='string'&&v.length>500)v=v.slice(0,500);e[k]=typeof v==='string'?v:String(v);if(KS.has(k))o[k]=x[k]}
+  o.__e=e;return o};
 let upCols=[];
 const pick=(r,ks)=>{for(const k of ks){const v=r[k];if(v!==undefined&&v!==null&&v!=='')return v}return ''};
 function parseRecs(recs){const T=[];let skip=0;
   for(const r of recs){let d=pick(r,AL.date);d=d instanceof Date?new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10):String(d).slice(0,10);
    if(!/^\d{4}-\d{2}-\d{2}$/.test(d)){skip++;continue}
    const s=k=>String(pick(r,AL[k])).trim(),la=parseFloat(pick(r,AL.lat)),lo=parseFloat(pick(r,AL.lon)),ok=la>=17.5&&la<=22.7&&lo>=81&&lo<=87.7;
-   T.push([d,s('d2')||s('d1')||'Unknown',s('blk')||s('b1')||'Unspecified',s('vtype')||'na',s('level')||'na',s('desig').replace(/_/g,' ')||'other',s('team')||'na',(s('name')||'Unknown').toLowerCase().replace(/\b\w/g,c=>c.toUpperCase()),ok?Math.round(la*100):0,ok?Math.round(lo*100):0,r.__x||''])}
+   T.push([d,s('d2')||s('d1')||'Unknown',s('blk')||s('b1')||'Unspecified',s('vtype')||'na',s('level')||'na',s('desig').replace(/_/g,' ')||'other',s('team')||'na',(s('name')||'Unknown').toLowerCase().replace(/\b\w/g,c=>c.toUpperCase()),ok?Math.round(la*100):0,ok?Math.round(lo*100):0,r.__e||null])}
   return{T,skip}}
 $('up').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f||!isState())return;staged=null;$('upRep').disabled=$('upApp').disabled=true;$('upP').hidden=false;$('prog').textContent='';$('barI').style.width='0';$('upInfo').textContent='Reading '+f.name+' …';
   const done=recs=>{setTimeout(()=>{const p=parseRecs(recs);if(!p.T.length){$('upInfo').textContent='No usable rows: no valid visit date found. Looked for a date column ('+AL.date.join(', ')+') with YYYY-MM-DD. Columns in your file start with: '+upCols.slice(0,10).join(', ')+' …';return}
     staged=p.T;$('upInfo').textContent=`${f.name}: ${p.T.length.toLocaleString()} valid rows · rows already in the cloud will be skipped`+(p.skip?` · ${p.skip.toLocaleString()} skipped (no valid date)`:'');$('upRep').disabled=$('upApp').disabled=false},30)};
   if(/\.csv$/i.test(f.name)){const recs=[];let hdr=null;Papa.parse(f,{header:false,skipEmptyLines:true,chunk:r=>{for(const row of r.data){if(!hdr){hdr=row.map((h,i)=>String(h).replace(/^\ufeff/,'').trim());upCols=hdr.slice();continue}const o={};for(let i=0;i<hdr.length;i++){const v=row[i];if(v===undefined||v===''||o[hdr[i]]!==undefined)continue;o[hdr[i]]=v}recs.push(prune(o))}},complete:()=>done(recs),error:err=>{$('upInfo').textContent='Could not read CSV: '+err}})}
   else{const fr=new FileReader();fr.onload=()=>{try{const wb=XLSX.read(fr.result,{type:'array',cellDates:true});const raw=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});upCols=Object.keys(raw[0]||{});done(raw.map(prune))}catch(x){$('upInfo').textContent='Could not read file: '+x.message}};fr.readAsArrayBuffer(f)}};
+/* Compact details: column names + each column's usual value are saved once (server 'cols'); every visit then carries only what differs. */
+async function packExtra(T,say){
+  const n=T.length,names=[],ix=new Map(),used=new Set();
+  for(const t of T){const e=t[10];if(e)for(const k in e)used.add(k)}
+  for(const k of upCols.concat([...used]))if(used.has(k)&&!ix.has(k)){ix.set(k,names.length);names.push(k)}   // keep the CSV's own column order
+  if(!names.length){T.forEach(t=>t[10]='');return null}
+  const cnt=names.map(()=>new Map()),dead=new Array(names.length).fill(false),have=new Array(names.length).fill(0);
+  for(const t of T){const e=t[10];if(!e)continue;for(const k in e){const i=ix.get(k);have[i]++;if(dead[i])continue;const m=cnt[i],v=e[k];m.set(v,(m.get(v)||0)+1);if(m.size>1500){dead[i]=true;m.clear()}}}
+  const defs={},dl=[];
+  names.forEach((k,i)=>{if(dead[i])return;let bv='',bc=n-have[i];for(const [v,c] of cnt[i])if(c>bc){bc=c;bv=v}if(bv!==''){defs[i]=bv;dl.push(i)}});
+  const id=(await api('cols',{names,defs})).id;
+  for(let z=0;z<n;z++){const t=T[z],e=t[10]||{},d={};
+    for(const k in e){const i=ix.get(k),v=e[k];if(v!==(defs[i]===undefined?'':defs[i]))d[i]=v}
+    for(const i of dl)if(e[names[i]]===undefined)d[i]='';
+    let x=id+'~'+JSON.stringify(d);
+    if(x.length>45000){for(const i in d)if(d[i].length>100)d[i]=d[i].slice(0,100);x=id+'~'+JSON.stringify(d);if(x.length>45000)x=''}
+    t[10]=x;if(z%4000===3999){say&&say(z+1,n);await new Promise(r=>setTimeout(r,0))}}
+  return id}
 async function push(mode){if(!staged)return;
   if(mode==='replace'&&!confirm('Replace ALL cloud data with these '+staged.length.toLocaleString()+' rows? District users will see the new data on their next sync.'))return;
   $('upRep').disabled=$('upApp').disabled=true;const bar=$('barI');
-  try{const batches=[];{let c=[],sz=0;for(const r of staged){const s=(r[10]?String(r[10]).length:0)+150;if(c.length&&(sz+s>450000||c.length>=600)){batches.push(c);c=[];sz=0}c.push(r);sz+=s}if(c.length)batches.push(c)}
+  try{if(!staged._packed){$('prog').textContent='Preparing details …';await new Promise(r=>setTimeout(r,20));await packExtra(staged,(d,n)=>$('prog').textContent='Preparing details '+d.toLocaleString()+' / '+n.toLocaleString()+' …');staged._packed=true}
+    const batches=[];{let c=[],sz=0;for(const r of staged){const s=(r[10]?String(r[10]).length:0)+150;if(c.length&&(sz+s>800000||c.length>=1200)){batches.push(c);c=[];sz=0}c.push(r);sz+=s}if(c.length)batches.push(c)}
     let done=0,nx=1,fail=false;const tick=n=>{done+=n;$('prog').textContent=`Uploading ${done.toLocaleString()} / ${staged.length.toLocaleString()} …`;bar.style.width=(90*done/staged.length)+'%'};
     await api('stage',{rows:batches[0],reset:true});tick(batches[0].length);
     await Promise.all([0,1].map(async()=>{while(!fail&&nx<batches.length){const b=batches[nx++];try{await api('stage',{rows:b,reset:false})}catch(e){fail=true;throw e}tick(b.length)}}));
     $('prog').textContent='Merging into the cloud sheet …';const j=await api('commit',{mode});bar.style.width='100%';
     $('prog').textContent=`Done: ${j.added.toLocaleString()} rows added`+(j.skipped?`, ${j.skipped.toLocaleString()} duplicates skipped`:'')+(j.filled?`, full details filled for ${j.filled.toLocaleString()} existing rows`:'')+` · cloud now holds ${j.total.toLocaleString()} rows.`;staged=null;$('upInfo').textContent='';await sync(true)}
-  catch(x){$('prog').textContent='Upload failed: '+x.message+' — nothing was changed in the live data unless the merge step had started.';$('upRep').disabled=$('upApp').disabled=false}}
+  catch(x){$('prog').textContent='Upload failed: '+(/Unknown action/.test(x.message)?'the Apps Script is out of date. Paste the new Code.gs and Deploy → Manage deployments → Edit → New version. ':x.message)+' — nothing was changed in the live data unless the merge step had started.';$('upRep').disabled=$('upApp').disabled=false}}
 $('upRep').onclick=()=>push('replace');$('upX').onclick=()=>{$('upP').hidden=true;staged=null};$('upApp').onclick=()=>push('append');$('fsync').onclick=()=>sync(true);
 function cloudInfo(){if(!isState())return;$('cloudInfo').textContent=meta.total!=null?`Cloud sheet holds ${Number(meta.total).toLocaleString()} visits · last updated ${meta.at?new Date(meta.at).toLocaleString():'—'}`:''}
 let users=[];

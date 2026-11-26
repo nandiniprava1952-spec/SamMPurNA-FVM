@@ -56,3 +56,7 @@ Use **⚙ Filters → ⬆ Upload CSV / XLSX** (State only). Pick the file, then 
 
 ## Full visit details (Records → View)
 Every column of the uploaded CSV/XLSX is now stored per visit (Visits sheet, column K "Extra") and shown in **Records → View**. After updating `Code.gs` deploy a **new version**. Rows uploaded earlier have no details: upload the CSV again with **Add new rows** and the existing rows are filled in (no duplicates are created).
+
+## Faster uploads (compact details)
+Each visit's full CSV details are now saved compactly: only the values that differ from the file's usual value for a column, with the column names stored once in the **Cols** tab (do not delete it). Rows saved earlier still open as before. **Replace all cloud data** now swaps the finished upload in as the Visits tab instead of copying rows, so it is instant and memory-safe (formatting you added by hand to the Visits tab is not kept). A 45,000-row export is about 65 calls to Apps Script instead of about 340.
+When updating: paste the new `Code.gs` and **Deploy → Manage deployments → Edit → New version** first, then push `index.html` and `sw.js`. A new page with an old Apps Script stops with a message asking you to redeploy.
